@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>安居客参数分析 - skuukzky</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<meta name="description" content="安居客参数分析前言手机里之前装过很多杂乱软件，最近闲来无事，又在学习 app 的东西，翻来翻来就找到了这个找房软件，于是想着分析一下，在此记录一下过程，也算是成长过程的小经历了，话不多开，分析开始。 请求分析 这个抓包软件是 Proxyman，Charles 在 mac 我目前还没找到好的汉化的，英文的用的也不是很舒服，所以就用 Proxyman 代替了，我们看到了加密参数特别显眼的就是nsign">
+<meta property="og:type" content="article">
+<meta property="og:title" content="安居客参数分析">
+<meta property="og:url" content="https://lpy30m.github.io/skuukzky.github.io/2024/08/23/%E9%80%86%E5%90%91/%E5%AE%89%E5%B1%85%E5%AE%A2%E5%8F%82%E6%95%B0%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="skuukzky">
+<meta property="og:description" content="安居客参数分析前言手机里之前装过很多杂乱软件，最近闲来无事，又在学习 app 的东西，翻来翻来就找到了这个找房软件，于是想着分析一下，在此记录一下过程，也算是成长过程的小经历了，话不多开，分析开始。 请求分析 这个抓包软件是 Proxyman，Charles 在 mac 我目前还没找到好的汉化的，英文的用的也不是很舒服，所以就用 Proxyman 代替了，我们看到了加密参数特别显眼的就是nsign">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/li0830mm/image/raw/master/image/image-20240701103806948.png">
+<meta property="og:image" content="https://gitee.com/li0830mm/image/raw/master/image/image-20240701104742163.png">
+<meta property="og:image" content="https://gitee.com/li0830mm/image/raw/master/image/image-20240701105134674.png">
+<meta property="og:image" content="https://gitee.com/li0830mm/image/raw/master/image/image-20240701105258055.png">
+<meta property="og:image" content="https://gitee.com/li0830mm/image/raw/master/image/image-20240701105734549.png">
+<meta property="og:image" content="https://gitee.com/li0830mm/image/raw/master/image/image-20240701110951065.png">
+<meta property="og:image" content="https://gitee.com/li0830mm/image/raw/master/image/image-20240701111526462.png">
+<meta property="og:image" content="https://gitee.com/li0830mm/image/raw/master/image/image-20240701111617886.png">
+<meta property="og:image" content="https://gitee.com/li0830mm/image/raw/master/image/image-20240701112138525.png">
+<meta property="og:image" content="https://gitee.com/li0830mm/image/raw/master/image/image-20240701112305829.png">
+<meta property="og:image" content="https://gitee.com/li0830mm/image/raw/master/image/image-20240701112535439.png">
+<meta property="article:published_time" content="2024-08-23T05:52:22.000Z">
+<meta property="article:modified_time" content="2024-08-23T05:52:23.320Z">
+<meta property="article:author" content="skuukzky">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/li0830mm/image/raw/master/image/image-20240701103806948.png">
+
+<link rel="stylesheet" href="/skuukzky.github.io/lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="/skuukzky.github.io/lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="/skuukzky.github.io/lib/iconfont/iconfont.css?v=1724392775099">
+
+<link rel="stylesheet" href="/skuukzky.github.io/css/style.css?v=1724392775099">
+
+
+
+
+    
+        <link rel="stylesheet" href="/skuukzky.github.io/custom.css?v=1724392775099">
+    
+
+
+
+<script src="/skuukzky.github.io/lib/mdui_043tiny/mdui.js" async></script>
+<script src="/skuukzky.github.io/lib/fancybox/fancybox.umd.js" async></script>
+<script src="/skuukzky.github.io/lib/lax.min.js" async></script>
+
+
+<script async src="/skuukzky.github.io/js/app.js?v=1724392775099"></script>
+
+ 
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4D4ZJ9G024"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag("js", new Date());
+
+  gtag("config", "G-4D4ZJ9G024");
+</script>
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<meta name="generator" content="Hexo 7.3.0"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(https://krseoul.imgtbl.com/i/2024/08/23/66c801dac807b.jpg)"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="/skuukzky.github.io/" title="skuukzky"><img src="https://krseoul.imgtbl.com/i/2024/08/23/66c803b67ebec.jpg" alt="skuukzky"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/skuukzky.github.io/" title="skuukzky">
+            <img src="https://krseoul.imgtbl.com/i/2024/08/23/66c803b67ebec.jpg" alt="skuukzky" alt="skuukzky">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>文章</span>4</div>
+        <div><span>标签</span>0</div>
+        <div><span>分类</span>1</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/" title="回到首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                回到首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/archive.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/PY.html" title="我的朋友">
+            <i class="mdui-list-item-icon nexmoefont icon-unorderedlist"></i>
+            <div class="mdui-list-item-content">
+                我的朋友
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/donate.html" title="给我赞助">
+            <i class="mdui-list-item-icon nexmoefont icon-coffee"></i>
+            <div class="mdui-list-item-content">
+                给我赞助
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/about.html" title="关于博主">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于博主
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+         
+            <form id="search_form" action_e="https://cn.bing.com/search?q=site:nexmoe.com" onsubmit="return search();">
+                <label><input id="search_value" name="q" type="search" placeholder="搜索"></label>
+            </form>
+         
+    </div>
+</div>
+
+
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="https://space.bilibili.com/603975910"
+			target="_blank"
+			mdui-tooltip="{content: '哔哩哔哩'}"
+			style="
+				color: rgb(231, 106, 141);
+				background-color: rgba(231, 106, 141, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/lpy30m/"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://nexmoe.com/atom.xml"
+			target="_blank"
+			mdui-tooltip="{content: 'RSS'}"
+			style="
+				color: rgb(247, 132, 34);
+				background-color: rgba(247, 132, 34, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-rss"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章分类</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/skuukzky.github.io/categories/逆向/">逆向</a>
+          <span class="category-list-count">3</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+    
+        
+        
+    
+        
+        
+        
+        
+   
+    <div class="nexmoe-copyright">
+        &copy; 2024 skuukzky
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        <br><a target="_blank" href="https://beian.miit.gov.cn/"></a>
+
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover absolute" style="padding-top: 20.833333333333336%;"> 
+            <img src="https://krseoul.imgtbl.com/i/2024/08/23/66c814fade9a8.jpg" alt="安居客参数分析" loading="lazy">
+            <h1>安居客参数分析</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2024年08月23日</a>
+        
+            <a class="nexmoefont icon-appstore-fill -link" href="/skuukzky.github.io/categories/%E9%80%86%E5%90%91/">逆向</a>
+        
+        
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <h1 id="安居客参数分析"><a href="#安居客参数分析" class="headerlink" title="安居客参数分析"></a>安居客参数分析</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>手机里之前装过很多杂乱软件，最近闲来无事，又在学习 app 的东西，翻来翻来就找到了这个找房软件，于是想着分析一下，在此记录一下过程，也算是成长过程的小经历了，话不多开，分析开始。</p>
+<h2 id="请求分析"><a href="#请求分析" class="headerlink" title="请求分析"></a>请求分析</h2><p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://gitee.com/li0830mm/image/raw/master/image/image-20240701103806948.png" alt="image-20240701103806948" data-caption="image-20240701103806948" loading="lazy"></p>
+<p>这个抓包软件是 Proxyman，Charles 在 mac 我目前还没找到好的汉化的，英文的用的也不是很舒服，所以就用 Proxyman 代替了，我们看到了加密参数特别显眼的就是<code>nsign和 nsign_uuid 应该是和nsign有关和</code>get_md5&#96;</p>
+<h2 id="参数分析"><a href="#参数分析" class="headerlink" title="参数分析"></a>参数分析</h2><p>做 app 逆向第一步肯定就是反编译了，不过在此之前我们还需要查看 app 是否加固，否则没办法得到大概的源代码，我们用 appmsg 进行查看。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://gitee.com/li0830mm/image/raw/master/image/image-20240701104742163.png" alt="image-20240701104742163" data-caption="image-20240701104742163" loading="lazy"></p>
+<p>​ 很好啊，没有加固，我们直接 jadx 进行反编译即可。</p>
+<h3 id="nsign"><a href="#nsign" class="headerlink" title="nsign"></a>nsign</h3><p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://gitee.com/li0830mm/image/raw/master/image/image-20240701105134674.png" alt="image-20240701105134674" data-caption="image-20240701105134674" loading="lazy"> 进入了 SignUtil.c 的方法，而 SignUtil.c 则在函数中调用了一个 getSign0 的 native 方法。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://gitee.com/li0830mm/image/raw/master/image/image-20240701105258055.png" alt="image-20240701105258055" data-caption="image-20240701105258055" loading="lazy"></p>
+<p>​ 我们直接打开 ida 啊，去找一下 SignUtil 这个 so 文件</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://gitee.com/li0830mm/image/raw/master/image/image-20240701105734549.png" alt="image-20240701105734549" data-caption="image-20240701105734549" loading="lazy"></p>
+<p>​ 是个静态注册，而且代码也没什么混淆，还是很利于我们分析的，其实我们也可以<a target="_blank" rel="noopener" href="https://github.com/Pr0214/trace_natives">trace_natives</a>这个 ida 插件，就能获取 SO 代码段中所有函数的偏移地址，再使用 frida-trace 批量 trace so 函数的调用。(由于 mac 下暂无高版本的 ida pro,所以我此处用 Windows 的 ida7.7 演示.)</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://gitee.com/li0830mm/image/raw/master/image/image-20240701110951065.png" alt="image-20240701110951065" data-caption="image-20240701110951065" loading="lazy"></p>
+<p>图没截全，我们根据最开始的 sub_18f0 找过去，我们先静态分析一下代码,</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://gitee.com/li0830mm/image/raw/master/image/image-20240701111526462.png" alt="image-20240701111526462" data-caption="image-20240701111526462" loading="lazy"></p>
+<p>发现 get_sign 这个函数比较亮眼，而我们刚才 trace 的过程中也有这个函数的调用，所以我们继续反编译分析查看</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://gitee.com/li0830mm/image/raw/master/image/image-20240701111617886.png" alt="image-20240701111617886" data-caption="image-20240701111617886" loading="lazy"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qsort(v11, v9, <span class="number">24LL</span>, sub_185C);</span><br></pre></td></tr></table></figure>
+
+<p>看到一个 sub_185c 这个函数的调用，其实我们大概能根据 qsort 猜出来，他是根据全面的 hook 的请求参数来进行一个 sort 排序，</p>
+<p>在下文我们能看到这个”bcb2e93c6b527180099601a2dd8ef8b1”这个字符串，很大可能性是在下文的 SIGNMD5()这个函数中的进行 md5 加盐的操作</p>
+<p>我们进入 SIGNMD5 函数查看</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://gitee.com/li0830mm/image/raw/master/image/image-20240701112138525.png" alt="image-20240701112138525" data-caption="image-20240701112138525" loading="lazy"></p>
+<p>已经很像 Md5 的操作，还需经进入 sub_C18 查看</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://gitee.com/li0830mm/image/raw/master/image/image-20240701112305829.png" alt="image-20240701112305829" data-caption="image-20240701112305829" loading="lazy"></p>
+<p>已经很明显看到 这个是 md5 加密中的 k 表的第一个</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://gitee.com/li0830mm/image/raw/master/image/image-20240701112535439.png" alt="image-20240701112535439" data-caption="image-20240701112535439" loading="lazy"></p>
+<p>但是下文的结构也不是很像，所以我们具体要 hook 一下，然后手动 md5 加密看看，是否为标准的 md5 加密。</p>
+
+    
+  </article>
+
+  
+      
+    <div class="nexmoe-post-copyright">
+        <strong>本文作者：</strong>skuukzky<br>
+        <strong>本文链接：</strong><a href="https://lpy30m.github.io/skuukzky.github.io/2024/08/23/%E9%80%86%E5%90%91/%E5%AE%89%E5%B1%85%E5%AE%A2%E5%8F%82%E6%95%B0%E5%88%86%E6%9E%90/" title="https:&#x2F;&#x2F;lpy30m.github.io&#x2F;skuukzky.github.io&#x2F;2024&#x2F;08&#x2F;23&#x2F;%E9%80%86%E5%90%91&#x2F;%E5%AE%89%E5%B1%85%E5%AE%A2%E5%8F%82%E6%95%B0%E5%88%86%E6%9E%90&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;lpy30m.github.io&#x2F;skuukzky.github.io&#x2F;2024&#x2F;08&#x2F;23&#x2F;%E9%80%86%E5%90%91&#x2F;%E5%AE%89%E5%B1%85%E5%AE%A2%E5%8F%82%E6%95%B0%E5%88%86%E6%9E%90&#x2F;</a><br>
+        
+            <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+
+        
+    </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+</div>
+  
+  
+    <script async src="/skuukzky.github.io/js/copy-codeblock.js?v=1724392775087"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          <script src="https://giscus.app/client.js"
+    data-repo="lpy30m/skuukzky.github.io"
+    data-repo-id="R_kgDOMnIPZw"
+    data-category="General"
+    data-category-id="DIC_kwDOMnIPZ84Ch3f5"
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async>
+</script>
+
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%89%E5%B1%85%E5%AE%A2%E5%8F%82%E6%95%B0%E5%88%86%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">安居客参数分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%B7%E6%B1%82%E5%88%86%E6%9E%90"><span class="toc-number">1.2.</span> <span class="toc-text">请求分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E5%88%86%E6%9E%90"><span class="toc-number">1.3.</span> <span class="toc-text">参数分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#nsign"><span class="toc-number">1.3.1.</span> <span class="toc-text">nsign</span></a></li></ol></li></ol></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2058306854838448" crossorigin="anonymous"></script>
+</div></body></html>
