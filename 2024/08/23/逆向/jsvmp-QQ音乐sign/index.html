@@ -6,31 +6,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
 
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-<meta name="description" content="jsvmp-qq 音乐">
+<meta name="description" content="jsvmp-qq 音乐入口处直接搜 sign 打断点就好了 就定位到这个地方。  t.data 是加密的 params 进入 o，印入眼帘的则是 jsvmp 了  直接在 switch 处打上断电，猛梭就完事了。 输出的是 d 这个数组。 我们在上文中看到了一些 sha1 中的 4 轮运算的值 所以大胆猜测一下，他对我们的加密的字符串 params 做了 sha1 的加密操作，所以我们带到一个网站">
 <meta property="og:type" content="article">
 <meta property="og:title" content="qqsign jsvmp算法还原">
 <meta property="og:url" content="https://lpy30m.github.io/skuukzky.github.io/2024/08/23/%E9%80%86%E5%90%91/jsvmp-QQ%E9%9F%B3%E4%B9%90sign/index.html">
 <meta property="og:site_name" content="skuukzky">
-<meta property="og:description" content="jsvmp-qq 音乐">
+<meta property="og:description" content="jsvmp-qq 音乐入口处直接搜 sign 打断点就好了 就定位到这个地方。  t.data 是加密的 params 进入 o，印入眼帘的则是 jsvmp 了  直接在 switch 处打上断电，猛梭就完事了。 输出的是 d 这个数组。 我们在上文中看到了一些 sha1 中的 4 轮运算的值 所以大胆猜测一下，他对我们的加密的字符串 params 做了 sha1 的加密操作，所以我们带到一个网站">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://krseoul.imgtbl.com/i/2024/08/24/66c98bc969bec.png">
+<meta property="og:image" content="https://krseoul.imgtbl.com/i/2024/08/24/66c98bc9b3b20.png">
+<meta property="og:image" content="https://krseoul.imgtbl.com/i/2024/08/24/66c98bca8f848.png">
+<meta property="og:image" content="https://krseoul.imgtbl.com/i/2024/08/24/66c98bceb3d65.png">
 <meta property="article:published_time" content="2024-08-23T04:40:22.000Z">
-<meta property="article:modified_time" content="2024-08-23T05:42:22.577Z">
+<meta property="article:modified_time" content="2024-08-24T07:31:10.706Z">
 <meta property="article:author" content="skuukzky">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://krseoul.imgtbl.com/i/2024/08/24/66c98bc969bec.png">
 
 <link rel="stylesheet" href="/skuukzky.github.io/lib/fancybox/fancybox.css">
 <link rel="stylesheet" href="/skuukzky.github.io/lib/mdui_043tiny/mdui.css">
 
 
-<link rel="stylesheet" href="/skuukzky.github.io/lib/iconfont/iconfont.css?v=1724393477736">
+<link rel="stylesheet" href="/skuukzky.github.io/lib/iconfont/iconfont.css?v=1724484688995">
 
-<link rel="stylesheet" href="/skuukzky.github.io/css/style.css?v=1724393477736">
+<link rel="stylesheet" href="/skuukzky.github.io/css/style.css?v=1724484688995">
 
 
 
 
     
-        <link rel="stylesheet" href="/skuukzky.github.io/custom.css?v=1724393477736">
+        <link rel="stylesheet" href="/skuukzky.github.io/custom.css?v=1724484688995">
     
 
 
@@ -40,7 +45,7 @@
 <script src="/skuukzky.github.io/lib/lax.min.js" async></script>
 
 
-<script async src="/skuukzky.github.io/js/app.js?v=1724393477736"></script>
+<script async src="/skuukzky.github.io/js/app.js?v=1724484688995"></script>
 
  
 
@@ -236,7 +241,24 @@
     
 </div>
 
-    <h1 id="jsvmp-qq-音乐"><a href="#jsvmp-qq-音乐" class="headerlink" title="jsvmp-qq 音乐"></a><strong>jsvmp-qq 音乐</strong></h1>
+    <h1 id="jsvmp-qq-音乐"><a href="#jsvmp-qq-音乐" class="headerlink" title="jsvmp-qq 音乐"></a><strong>jsvmp-qq 音乐</strong></h1><h2 id="入口处"><a href="#入口处" class="headerlink" title="入口处"></a>入口处</h2><p>直接搜 sign 打断点就好了 就定位到这个地方。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://krseoul.imgtbl.com/i/2024/08/24/66c98bc969bec.png" alt="image-20240823142057651" data-caption="image-20240823142057651" loading="lazy"></p>
+<p>t.data 是加密的 params</p>
+<p>进入 o，印入眼帘的则是 jsvmp 了</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://krseoul.imgtbl.com/i/2024/08/24/66c98bc9b3b20.png" alt="image-20240823142219618" data-caption="image-20240823142219618" loading="lazy"></p>
+<p>直接在 switch 处打上断电，猛梭就完事了。</p>
+<p>输出的是 d 这个数组。</p>
+<p>我们在上文中看到了一些 sha1 中的 4 轮运算的值</p>
+<p>所以大胆猜测一下，他对我们的加密的字符串 params 做了 sha1 的加密操作，所以我们带到一个网站去加密然后验证一下</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://krseoul.imgtbl.com/i/2024/08/24/66c98bca8f848.png" alt="image-20240823142852579" data-caption="image-20240823142852579" loading="lazy"></p>
+<p>所以直接从 sha1 值第一处的往下分析。</p>
+<p>有时间在讲吧，下面就是对 switch 插装 <code>&#39;索引&#39;,n[g+1],g+1,&#39;值&#39;,console.log(d)</code></p>
+<p>call 地方打索引断点 。</p>
+<p>贴出代码</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> aaa = [<span class="number">23</span>, <span class="number">14</span>, <span class="number">6</span>, <span class="number">36</span>, <span class="number">16</span>, <span class="number">40</span>, <span class="number">7</span>, <span class="number">19</span>];</span><br><span class="line"><span class="keyword">var</span> bbb = [<span class="number">16</span>, <span class="number">1</span>, <span class="number">32</span>, <span class="number">12</span>, <span class="number">19</span>, <span class="number">27</span>, <span class="number">8</span>, <span class="number">5</span>];</span><br><span class="line"><span class="keyword">var</span> ccc = [</span><br><span class="line">  <span class="number">89</span>, <span class="number">39</span>, <span class="number">179</span>, <span class="number">150</span>, <span class="number">218</span>, <span class="number">82</span>, <span class="number">58</span>, <span class="number">252</span>, <span class="number">177</span>, <span class="number">52</span>, <span class="number">186</span>, <span class="number">123</span>, <span class="number">120</span>, <span class="number">64</span>, <span class="number">242</span>, <span class="number">133</span>, <span class="number">143</span>,</span><br><span class="line">  <span class="number">161</span>, <span class="number">121</span>, <span class="number">179</span>,</span><br><span class="line">];</span><br><span class="line"><span class="keyword">var</span> string_to_num = &#123;</span><br><span class="line">  <span class="number">0</span>: <span class="number">0</span>,</span><br><span class="line">  <span class="number">1</span>: <span class="number">1</span>,</span><br><span class="line">  <span class="number">2</span>: <span class="number">2</span>,</span><br><span class="line">  <span class="number">3</span>: <span class="number">3</span>,</span><br><span class="line">  <span class="number">4</span>: <span class="number">4</span>,</span><br><span class="line">  <span class="number">5</span>: <span class="number">5</span>,</span><br><span class="line">  <span class="number">6</span>: <span class="number">6</span>,</span><br><span class="line">  <span class="number">7</span>: <span class="number">7</span>,</span><br><span class="line">  <span class="number">8</span>: <span class="number">8</span>,</span><br><span class="line">  <span class="number">9</span>: <span class="number">9</span>,</span><br><span class="line">  <span class="attr">A</span>: <span class="number">10</span>,</span><br><span class="line">  <span class="attr">B</span>: <span class="number">11</span>,</span><br><span class="line">  <span class="attr">C</span>: <span class="number">12</span>,</span><br><span class="line">  <span class="attr">D</span>: <span class="number">13</span>,</span><br><span class="line">  <span class="attr">E</span>: <span class="number">14</span>,</span><br><span class="line">  <span class="attr">F</span>: <span class="number">15</span>,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">var</span> b64str =</span><br><span class="line">  <span class="string">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=&quot;</span>;</span><br><span class="line"><span class="keyword">var</span> data_Sha1 = <span class="string">&quot;e3b7e88c5178c77fec1228baf2d8515f81e8809e&quot;</span>.<span class="title function_">toUpperCase</span>();</span><br><span class="line"><span class="keyword">var</span> stra = aaa</span><br><span class="line">  .<span class="title function_">map</span>(<span class="function">(<span class="params">x</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> data_Sha1.<span class="title function_">charAt</span>(x);</span><br><span class="line">  &#125;)</span><br><span class="line">  .<span class="title function_">join</span>(<span class="string">&quot;&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;first&quot;</span>, stra);</span><br><span class="line"><span class="keyword">var</span> strb = bbb</span><br><span class="line">  .<span class="title function_">map</span>(<span class="function">(<span class="params">x</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> data_Sha1.<span class="title function_">charAt</span>(x);</span><br><span class="line">  &#125;)</span><br><span class="line">  .<span class="title function_">join</span>(<span class="string">&quot;&quot;</span>);</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;last&quot;</span>, strb);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> result_arr = [];</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; <span class="number">2</span> * ccc.<span class="property">length</span>; i++) &#123;</span><br><span class="line">  <span class="keyword">var</span> a1 = data_Sha1[i],</span><br><span class="line">    a2 = data_Sha1[i + <span class="number">1</span>],</span><br><span class="line">    b1 = string_to_num[a1],</span><br><span class="line">    b2 = string_to_num[a2],</span><br><span class="line">    c = ccc[i / <span class="number">2</span>],</span><br><span class="line">    result = (b1 * <span class="number">16</span>) ^ b2 ^ c;</span><br><span class="line">  result_arr.<span class="title function_">push</span>(result);</span><br><span class="line">  i++;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(result_arr);</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(result_arr.<span class="property">length</span>);</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="title class_">String</span>.<span class="title function_">fromCharCode</span>(...result_arr));</span><br><span class="line"><span class="comment">// /[+=]+$/</span></span><br><span class="line"><span class="keyword">var</span> str_medium = <span class="title function_">btoa</span>(<span class="title class_">String</span>.<span class="title function_">fromCharCode</span>(...result_arr)).<span class="title function_">replace</span>(</span><br><span class="line">  <span class="regexp">/\+|=+$/g</span>,</span><br><span class="line">  <span class="string">&quot;&quot;</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;str_medium&quot;</span>, str_medium.<span class="title function_">toLowerCase</span>());</span><br><span class="line"></span><br><span class="line">result_str = (<span class="string">&quot;zzc&quot;</span> + stra + str_medium + strb).<span class="title function_">toLowerCase</span>();</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(result_str);</span><br></pre></td></tr></table></figure>
+
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://krseoul.imgtbl.com/i/2024/08/24/66c98bceb3d65.png" alt="image-20240824152846683" data-caption="image-20240824152846683" loading="lazy"></p>
+
     
   </article>
 
@@ -260,7 +282,7 @@
 </div>
   
   
-    <script async src="/skuukzky.github.io/js/copy-codeblock.js?v=1724393477710"></script>
+    <script async src="/skuukzky.github.io/js/copy-codeblock.js?v=1724484688968"></script>
   
 
   
@@ -294,7 +316,7 @@
             <button class="mdui-fab catalog" style="overflow:unset;">
                 <i class="nexmoefont icon-i-catalog"></i>
                 <div class="nexmoe-toc">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#jsvmp-qq-%E9%9F%B3%E4%B9%90"><span class="toc-number">1.</span> <span class="toc-text">jsvmp-qq 音乐</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#jsvmp-qq-%E9%9F%B3%E4%B9%90"><span class="toc-number">1.</span> <span class="toc-text">jsvmp-qq 音乐</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%A5%E5%8F%A3%E5%A4%84"><span class="toc-number">1.1.</span> <span class="toc-text">入口处</span></a></li></ol></li></ol>
                 </div>
             </button>
             
