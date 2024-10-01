@@ -17,3 +17,31 @@ iframe {
 article ul li {
     line-height: 1.5rem;
 }
+
+
+[data-theme="light"] {
+    --hl-color: #90a4ae !important;
+    --hl-bg: #f6f8fa !important;
+    --hltools-bg: #e6ebf1 !important;
+    --hltools-color: #90a4ae !important;
+    --hlnumber-bg: #f6f8fa !important;
+    --hlnumber-color: rgba(144, 164, 174, 0.5) !important;
+    --hlscrollbar-bg: #dce4eb !important;
+    --hlexpand-bg: linear-gradient(180deg, rgba(246, 248, 250, 0.1), rgba(246, 248, 250, 0.9)) !important;
+}
+
+[data-theme="dark"] {
+    --hl-color: #abb2bf !important;
+    --hl-bg: #282c34 !important;
+    --hltools-bg: #21252b !important;
+    --hltools-color: #bbbbbc !important;
+    --hlnumber-bg: #282c34 !important;
+    --hlnumber-color: #495162 !important;
+    --hlscrollbar-bg: #373c47 !important;
+    --hlexpand-bg: linear-gradient(180deg, rgba(40, 44, 52, 0.1), rgba(40, 44, 52, 0.9)) !important;
+}
+
+figure.shiki {
+    background-color: var(--hl-bg) !important;
+    color: var(--hl-color) !important;
+}
