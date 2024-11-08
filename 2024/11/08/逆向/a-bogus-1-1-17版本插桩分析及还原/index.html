@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>a_bogus-1.1.17版本插桩分析及还原 - skuukzky</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<meta name="description" content="抖音 a_bogus 分析12345678910摘选至52破解  https:&#x2F;&#x2F;www.52pojie.cn&#x2F;thread-1974900-1-1.html 1. device_platform&#x3D;*** + dhzx 进行2次sm3加密 2.dhzx 进行一次sm3加密 3.根据轨迹生成一个乱码，将该乱码和ua传入加密，加密后的结果再次进行sm3 4.多次时间戳操作具体操作看日志很清楚 5.轨迹">
+<meta property="og:type" content="article">
+<meta property="og:title" content="a_bogus-1.1.17版本插桩分析及还原">
+<meta property="og:url" content="https://lpy30m.github.io/skuukzky.github.io/2024/11/08/%E9%80%86%E5%90%91/a-bogus-1-1-17%E7%89%88%E6%9C%AC%E6%8F%92%E6%A1%A9%E5%88%86%E6%9E%90%E5%8F%8A%E8%BF%98%E5%8E%9F/index.html">
+<meta property="og:site_name" content="skuukzky">
+<meta property="og:description" content="抖音 a_bogus 分析12345678910摘选至52破解  https:&#x2F;&#x2F;www.52pojie.cn&#x2F;thread-1974900-1-1.html 1. device_platform&#x3D;*** + dhzx 进行2次sm3加密 2.dhzx 进行一次sm3加密 3.根据轨迹生成一个乱码，将该乱码和ua传入加密，加密后的结果再次进行sm3 4.多次时间戳操作具体操作看日志很清楚 5.轨迹">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://a1.boltp.com/2024/11/08/672db3b57830c.png">
+<meta property="og:image" content="https://a1.boltp.com/2024/11/08/672db3d554b43.png">
+<meta property="og:image" content="https://a1.boltp.com/2024/11/08/672db3e9d57a7.png">
+<meta property="og:image" content="https://a1.boltp.com/2024/11/08/672db407b6dcd.png">
+<meta property="og:image" content="https://a1.boltp.com/2024/11/08/672db4207af25.png">
+<meta property="og:image" content="https://a1.boltp.com/2024/11/08/672db43b48563.png">
+<meta property="og:image" content="https://a1.boltp.com/2024/11/08/672db44dd9084.png">
+<meta property="og:image" content="https://a1.boltp.com/2024/11/08/672db4654b6aa.png">
+<meta property="og:image" content="https://a1.boltp.com/2024/11/08/672db47e8f8a4.png">
+<meta property="og:image" content="https://a1.boltp.com/2024/11/08/672db486a017f.png">
+<meta property="og:image" content="https://a1.boltp.com/2024/11/08/672db4ac172fe.png">
+<meta property="og:image" content="https://a1.boltp.com/2024/11/08/672db4c8aadc2.png">
+<meta property="og:image" content="https://a1.boltp.com/2024/11/08/672db4cfc4b5b.png">
+<meta property="article:published_time" content="2024-11-08T06:40:53.000Z">
+<meta property="article:modified_time" content="2024-11-08T07:06:32.945Z">
+<meta property="article:author" content="skuukzky">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://a1.boltp.com/2024/11/08/672db3b57830c.png">
+
+<link rel="stylesheet" href="/skuukzky.github.io/lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="/skuukzky.github.io/lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="/skuukzky.github.io/lib/iconfont/iconfont.css?v=1731049622898">
+
+<link rel="stylesheet" href="/skuukzky.github.io/css/style.css?v=1731049622898">
+
+
+
+
+    
+        <link rel="stylesheet" href="/skuukzky.github.io/custom.css?v=1731049622898">
+    
+
+
+
+<script src="/skuukzky.github.io/lib/mdui_043tiny/mdui.js" async></script>
+<script src="/skuukzky.github.io/lib/fancybox/fancybox.umd.js" async></script>
+<script src="/skuukzky.github.io/lib/lax.min.js" async></script>
+
+
+<script async src="/skuukzky.github.io/js/app.js?v=1731049622898"></script>
+
+ 
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4D4ZJ9G024"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag("js", new Date());
+
+  gtag("config", "G-4D4ZJ9G024");
+</script>
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-shiki-plugin@latest/lib/codeblock.css">
+<style>:root{--hl-color:#abb2bf;--hl-bg:#282c34;--hltools-bg:#21252b;--hltools-color:#bbbbbc;--hlnumber-bg:#282c34;--hlnumber-color:#495162;--hlscrollbar-bg:#373c47;--hlexpand-bg:linear-gradient(180deg,rgba(40,44,52,0.1),rgba(40,44,52,0.9))}</style>
+    <style>
+    .code-expand-btn:not(.expand-done) ~ div.codeblock,
+    .code-expand-btn:not(.expand-done) ~ * div.codeblock {
+      overflow: hidden;
+      height: 360px;
+    }
+    </style>
+  <!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(https://a1.boltp.com/2024/09/21/66eeaaa4d2610.webp)"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="/skuukzky.github.io/" title="skuukzky"><img src="https://a1.boltp.com/2024/09/21/66eeaabc1ddcc.webp" alt="skuukzky"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/skuukzky.github.io/" title="skuukzky">
+            <img src="https://a1.boltp.com/2024/09/21/66eeaabc1ddcc.webp" alt="skuukzky" alt="skuukzky">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>文章</span>9</div>
+        <div><span>标签</span>0</div>
+        <div><span>分类</span>2</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/" title="回到首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                回到首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/archive.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/PY.html" title="我的朋友">
+            <i class="mdui-list-item-icon nexmoefont icon-unorderedlist"></i>
+            <div class="mdui-list-item-content">
+                我的朋友
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/donate.html" title="给我赞助">
+            <i class="mdui-list-item-icon nexmoefont icon-coffee"></i>
+            <div class="mdui-list-item-content">
+                给我赞助
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/about.html" title="关于博主">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于博主
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+         
+            <form id="search_form" action_e="https://cn.bing.com/search?q=site:nexmoe.com" onsubmit="return search();">
+                <label><input id="search_value" name="q" type="search" placeholder="搜索"></label>
+            </form>
+         
+    </div>
+</div>
+
+
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="https://space.bilibili.com/603975910"
+			target="_blank"
+			mdui-tooltip="{content: '哔哩哔哩'}"
+			style="
+				color: rgb(231, 106, 141);
+				background-color: rgba(231, 106, 141, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/lpy30m/"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://nexmoe.com/atom.xml"
+			target="_blank"
+			mdui-tooltip="{content: 'RSS'}"
+			style="
+				color: rgb(247, 132, 34);
+				background-color: rgba(247, 132, 34, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-rss"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章分类</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/skuukzky.github.io/categories/逆向/">逆向</a>
+          <span class="category-list-count">6</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/skuukzky.github.io/categories/验证码识别/">验证码识别</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+    
+        
+        
+    
+        
+        
+        
+        
+   
+    <div class="nexmoe-copyright">
+        &copy; 2024 skuukzky
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        <br><a target="_blank" href="https://beian.miit.gov.cn/"></a>
+
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover absolute" style="padding-top: 33.33333333333333%;"> 
+            <img src="https://a1.boltp.com/2024/11/08/672db8770abd3.png" alt="a_bogus-1.1.17版本插桩分析及还原" loading="lazy">
+            <h1>a_bogus-1.1.17版本插桩分析及还原</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2024年11月08日</a>
+        
+            <a class="nexmoefont icon-appstore-fill -link" href="/skuukzky.github.io/categories/%E9%80%86%E5%90%91/">逆向</a>
+        
+        
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <h1 id="抖音-a-bogus-分析"><a href="#抖音-a-bogus-分析" class="headerlink" title="抖音 a_bogus 分析"></a>抖音 a_bogus 分析</h1><figure class="shiki"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">摘选至52破解  https://www.52pojie.cn/thread-1974900-1-1.html</span></span>
+<span class="line"><span style="color: #abb2bf">1. device_platform=*** + dhzx 进行2次sm3加密</span></span>
+<span class="line"><span style="color: #abb2bf">2.dhzx 进行一次sm3加密</span></span>
+<span class="line"><span style="color: #abb2bf">3.根据轨迹生成一个乱码，将该乱码和ua传入加密，加密后的结果再次进行sm3</span></span>
+<span class="line"><span style="color: #abb2bf">4.多次时间戳操作具体操作看日志很清楚</span></span>
+<span class="line"><span style="color: #abb2bf">5.轨迹加密成[x,x1,x2,x3]</span></span>
+<span class="line"><span style="color: #abb2bf">6.6**3，6**1对这两个数操作</span></span>
+<span class="line"><span style="color: #abb2bf">7.1721|403|1721|987|1728|987|1728|1117|MacIntel 对这个数charCodeAt放到一个数组</span></span>
+<span class="line"><span style="color: #abb2bf">8.随机数和一些加密数组的操作，随机数生成一些数组的操作</span></span>
+<span class="line"><span style="color: #abb2bf">9.最后根据上面的加密结果生成一个数组，然后传入一个乱码和这个数组加密，最后的魔改base64加密得到最终结果</span></span></code></pre></div></div></figure>
+
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><h3 id="url-加密"><a href="#url-加密" class="headerlink" title="url 加密"></a>url 加密</h3><p>插装点 <code>var R = T.apply(E, j);</code> 日志断点 <code>&quot;apply::: &quot;,&quot;R:&quot;,R,&quot;E:&quot;,E,&quot;T:&quot;,T,&quot;j:&quot;,j</code></p>
+<p>接下来分别给 运算符插装 如 <code>+ - / &gt;&gt; &lt;&lt;  &amp; * | ^</code> 日志断点例如 <code>&quot;v:&quot;,v,&quot;p:&quot;,p,&quot;v[p]:&quot;,v[p],&quot;r:&quot;,r,&quot;v[p] = v[p] / r :::&quot;,v[p] / r</code></p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://a1.boltp.com/2024/11/08/672db3b57830c.png" alt="image-20241101164546792" data-caption="image-20241101164546792" loading="lazy"></p>
+<p>然后我们发包 再打上 xhr 断点 接着利用正则搜索我们的参数 <code>[^&#39;]device_platform=</code> 查看日志发现 在拼接参数然后再末尾拼接 dhzx 进行 sm3 加密 然后在基础上再进行一次 sm3 加密。比如 &#96;sm3.sum(sm3.sum(url_search_params + suffix))</p>
+<p>至于怎么知道是 sm3 的。我们可以手动点击日志中的 reset 函数 开发者工具会自动跳动函数 发现内部是个 sum 函数 我们可以全部扣出来 你也可以拿着部分代码放入百度 也能搜索到关于 sm3 加密的相关的细节</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://a1.boltp.com/2024/11/08/672db3d554b43.png" alt="image-20241101165036648" data-caption="image-20241101165036648" loading="lazy"></p>
+<p>同样的<code>dhzx</code>也是做了如上的两次 sm3 加密。</p>
+<h3 id="ua-加密"><a href="#ua-加密" class="headerlink" title="ua 加密"></a>ua 加密</h3><p>魔改的 rc4 算法 key 是<code>String.fromCharCode.apply(null, [0.00390625, 1, 0)</code> 在日志中是 <code>&#39;\x00\x01\x00&#39;</code></p>
+<p>加密文本则为 ua 请求头。</p>
+<p>正常的 rc4 算法为</p>
+<figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">function</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">rc4_encrypt</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75; font-style: italic">plaintext</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75; font-style: italic">key</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> [];</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">for</span><span style="color: #ABB2BF"> (</span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">; </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&lt;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">256</span><span style="color: #ABB2BF">; </span><span style="color: #E06C75">i</span><span style="color: #56B6C2">++</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">  }</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">j</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">for</span><span style="color: #ABB2BF"> (</span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">; </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&lt;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">256</span><span style="color: #ABB2BF">; </span><span style="color: #E06C75">i</span><span style="color: #56B6C2">++</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">j</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> (</span><span style="color: #E06C75">j</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">key</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">charCodeAt</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">%</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">key</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">length</span><span style="color: #ABB2BF">)) </span><span style="color: #56B6C2">%</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">256</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">temp</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">];</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">j</span><span style="color: #ABB2BF">];</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">j</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">temp</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">j</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">cipher</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> [];</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">for</span><span style="color: #ABB2BF"> (</span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">k</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">; </span><span style="color: #E06C75">k</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&lt;</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">plaintext</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">length</span><span style="color: #ABB2BF">; </span><span style="color: #E06C75">k</span><span style="color: #56B6C2">++</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> (</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">1</span><span style="color: #ABB2BF">) </span><span style="color: #56B6C2">%</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">256</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">j</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> (</span><span style="color: #E06C75">j</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">]) </span><span style="color: #56B6C2">%</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">256</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">temp</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">];</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">j</span><span style="color: #ABB2BF">];</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">j</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">temp</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">t</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> (</span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">j</span><span style="color: #ABB2BF">]) </span><span style="color: #56B6C2">%</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">256</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E5C07B">cipher</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">push</span><span style="color: #ABB2BF">(</span><span style="color: #E5C07B">String</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">fromCharCode</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">t</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">^</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">plaintext</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">charCodeAt</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">k</span><span style="color: #ABB2BF">)));</span></span>
+<span class="line"><span style="color: #ABB2BF">  }</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">return</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">cipher</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">join</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&quot;&quot;</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #ABB2BF">}</span></span></code></pre></div></div></figure>
+
+<p>第一出魔改点是倒取的 256 空数组 在日志呈现为</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://a1.boltp.com/2024/11/08/672db3e9d57a7.png" alt="image-20241106213922476" data-caption="image-20241106213922476" loading="lazy"></p>
+<p>第二处是 rc4 的密钥生成部分魔改</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://a1.boltp.com/2024/11/08/672db407b6dcd.png" alt="image-20241106214414876" data-caption="image-20241106214414876" loading="lazy"></p>
+<p>应该是在把源码上的<code>j + s[i]</code>变为了 <code>j * s[i]</code></p>
+<p>加密部分还是 RC4 的原生 xor，实际上各种加密算法的魔改基本都是在密钥轮进行的，很少有魔改加密轮的。</p>
+<p>还原后的代码应该是</p>
+<figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">function</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">rc4_encrypt</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75; font-style: italic">plaintext</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75; font-style: italic">key</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> [];</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">for</span><span style="color: #ABB2BF"> (</span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">; </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&lt;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">256</span><span style="color: #ABB2BF">; </span><span style="color: #E06C75">i</span><span style="color: #56B6C2">++</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">255</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">-</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">j</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">for</span><span style="color: #ABB2BF"> (</span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">; </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&lt;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">256</span><span style="color: #ABB2BF">; </span><span style="color: #E06C75">i</span><span style="color: #56B6C2">++</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">j</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> (</span><span style="color: #E06C75">j</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">*</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">j</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">key</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">charCodeAt</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">%</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">key</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">length</span><span style="color: #ABB2BF">)) </span><span style="color: #56B6C2">%</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">256</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">temp</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">];</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">j</span><span style="color: #ABB2BF">];</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">j</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">temp</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">  }</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E5C07B">console</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">log</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">j</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">cipher</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> [];</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">for</span><span style="color: #ABB2BF"> (</span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">k</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">; </span><span style="color: #E06C75">k</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&lt;</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">plaintext</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">length</span><span style="color: #ABB2BF">; </span><span style="color: #E06C75">k</span><span style="color: #56B6C2">++</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> (</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">1</span><span style="color: #ABB2BF">) </span><span style="color: #56B6C2">%</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">256</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">j</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> (</span><span style="color: #E06C75">j</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">]) </span><span style="color: #56B6C2">%</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">256</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">temp</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">];</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">j</span><span style="color: #ABB2BF">];</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">j</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">temp</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">t</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> (</span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">j</span><span style="color: #ABB2BF">]) </span><span style="color: #56B6C2">%</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">256</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E5C07B">cipher</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">push</span><span style="color: #ABB2BF">(</span><span style="color: #E5C07B">String</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">fromCharCode</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">s</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">t</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">^</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">plaintext</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">charCodeAt</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">k</span><span style="color: #ABB2BF">)));</span></span>
+<span class="line"><span style="color: #ABB2BF">  }</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">return</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">cipher</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">join</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&quot;&quot;</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #ABB2BF">}</span></span></code></pre></div></div></figure>
+
+<p>搜索部分发现和网页上是一样的人，如果不放心 后续 ua 还会进行 base64，sm3 加密可以进行结果对比。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://a1.boltp.com/2024/11/08/672db4207af25.png" alt="image-20241106215618229" data-caption="image-20241106215618229" loading="lazy"></p>
+<p>继续观察日志</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://a1.boltp.com/2024/11/08/672db43b48563.png" alt="image-20241106220614649" data-caption="image-20241106220614649" loading="lazy"></p>
+<p>发现了一个&#x3D;号。一般&#x3D;号的出现在 base64 中比较常见 所以我们可以猜测他是对我们上一步的 rc4 做了 base64 加密</p>
+<p>直接加密的结果是不对的 但我第二框圈出来了 很像一个 base64 的码表变化 我们在替换这个码表进行加密发现结果就对的上了。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://a1.boltp.com/2024/11/08/672db44dd9084.png" alt="image-20241106220930960" data-caption="image-20241106220930960" loading="lazy"></p>
+<p>继续查看日志 我们看到了上文 sm3 的加密函数和结果 这次加密的内容是 base64 加密的结果 同样运行一下发现结果一样。<br><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://a1.boltp.com/2024/11/08/672db4654b6aa.png" alt="image-20241106221518206" data-caption="image-20241106221518206" loading="lazy"></p>
+<h3 id="版本号处理"><a href="#版本号处理" class="headerlink" title="版本号处理"></a>版本号处理</h3><figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #E06C75">version</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #98C379">&quot;1.0.1.17-fix.01&quot;</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #E06C75">version_arr</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">version</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">split</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&quot;.&quot;</span><span style="color: #ABB2BF">).</span><span style="color: #61AFEF">map</span><span style="color: #ABB2BF">((</span><span style="color: #E06C75; font-style: italic">item</span><span style="color: #ABB2BF">) </span><span style="color: #C678DD">=&gt;</span><span style="color: #ABB2BF"> {</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #7F848E; font-style: italic">// 尝试将字符串转换为数字</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">number</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">Number</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">item</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #7F848E; font-style: italic">// 如果转换成功且为整数，则返回该数字，否则返回0</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">return</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">Number</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">isInteger</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">number</span><span style="color: #ABB2BF">) </span><span style="color: #C678DD">?</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">number</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">:</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">});</span></span></code></pre></div></div></figure>
+
+<p>直接 split 后数字化</p>
+<h3 id="短数组生成"><a href="#短数组生成" class="headerlink" title="短数组生成"></a>短数组生成</h3><p>可以先用工具固定时间戳 方便对比最终的结果。</p>
+<p>然后根据 e 的索引进行 分析</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://a1.boltp.com/2024/11/08/672db47e8f8a4.png" alt="image-20241108142224516" data-caption="image-20241108142224516" loading="lazy"></p>
+<p>其中 e+1 是因为他代码中是递减的处理到这个代码时候索引应该+1 才是对应的。</p>
+<p>对着日志继续分析，逻辑很清晰。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://a1.boltp.com/2024/11/08/672db486a017f.png" alt="image-20241108142434106" data-caption="image-20241108142434106" loading="lazy"></p>
+<h3 id="随机数生成算法"><a href="#随机数生成算法" class="headerlink" title="随机数生成算法"></a>随机数生成算法</h3><p>代码抄至 github 的开源项目</p>
+<figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">function</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">gener_random</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75; font-style: italic">random</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75; font-style: italic">option</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #C678DD">return</span><span style="color: #ABB2BF"> [</span></span>
+<span class="line"><span style="color: #ABB2BF">    (</span><span style="color: #E06C75">random</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">255</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">170</span><span style="color: #ABB2BF">) </span><span style="color: #56B6C2">|</span><span style="color: #ABB2BF"> (</span><span style="color: #E06C75">option</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">85</span><span style="color: #ABB2BF">),</span></span>
+<span class="line"><span style="color: #ABB2BF">    (</span><span style="color: #E06C75">random</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">255</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">85</span><span style="color: #ABB2BF">) </span><span style="color: #56B6C2">|</span><span style="color: #ABB2BF"> (</span><span style="color: #E06C75">option</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">170</span><span style="color: #ABB2BF">),</span></span>
+<span class="line"><span style="color: #ABB2BF">    ((</span><span style="color: #E06C75">random</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&gt;&gt;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">8</span><span style="color: #ABB2BF">) </span><span style="color: #56B6C2">&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">255</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">170</span><span style="color: #ABB2BF">) </span><span style="color: #56B6C2">|</span><span style="color: #ABB2BF"> (</span><span style="color: #E06C75">option</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">1</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">85</span><span style="color: #ABB2BF">),</span></span>
+<span class="line"><span style="color: #ABB2BF">    ((</span><span style="color: #E06C75">random</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&gt;&gt;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">8</span><span style="color: #ABB2BF">) </span><span style="color: #56B6C2">&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">255</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">85</span><span style="color: #ABB2BF">) </span><span style="color: #56B6C2">|</span><span style="color: #ABB2BF"> (</span><span style="color: #E06C75">option</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">1</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">170</span><span style="color: #ABB2BF">),</span></span>
+<span class="line"><span style="color: #ABB2BF">  ];</span></span>
+<span class="line"><span style="color: #ABB2BF">}</span></span></code></pre></div></div></figure>
+
+<p>两个位置用到，分别是：</p>
+<figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #E06C75">n</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">86</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">gener_random</span><span style="color: #ABB2BF">(</span><span style="color: #E5C07B">Math</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">random</span><span style="color: #ABB2BF">() </span><span style="color: #56B6C2">*</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">65535</span><span style="color: #ABB2BF">, [</span><span style="color: #E06C75">n</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">25</span><span style="color: #ABB2BF">][</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">], </span><span style="color: #E06C75">n</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">25</span><span style="color: #ABB2BF">][</span><span style="color: #D19A66">1</span><span style="color: #ABB2BF">]]).</span><span style="color: #61AFEF">concat</span><span style="color: #ABB2BF">(</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #61AFEF">gener_random</span><span style="color: #ABB2BF">(</span><span style="color: #E5C07B">Math</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">random</span><span style="color: #ABB2BF">() </span><span style="color: #56B6C2">*</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">65535</span><span style="color: #ABB2BF">, [</span><span style="color: #E06C75">n</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">25</span><span style="color: #ABB2BF">][</span><span style="color: #D19A66">2</span><span style="color: #ABB2BF">], </span><span style="color: #E06C75">n</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">25</span><span style="color: #ABB2BF">][</span><span style="color: #D19A66">3</span><span style="color: #ABB2BF">]])</span></span>
+<span class="line"><span style="color: #ABB2BF">);</span></span></code></pre></div></div></figure>
+
+<p>和</p>
+<figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #E06C75">n</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">89</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">gener_random</span><span style="color: #ABB2BF">(</span><span style="color: #E5C07B">Math</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">random</span><span style="color: #ABB2BF">() </span><span style="color: #56B6C2">*</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">65535</span><span style="color: #ABB2BF">, [</span><span style="color: #D19A66">3</span><span style="color: #ABB2BF">, </span><span style="color: #D19A66">82</span><span style="color: #ABB2BF">])</span><span style="color: #98C379">`</span></span></code></pre></div></div></figure>
+
+<h3 id="短数组转长数组"><a href="#短数组转长数组" class="headerlink" title="短数组转长数组"></a>短数组转长数组</h3><p>这个是最重要的一部分 也是 ab 生成的关键数组了</p>
+<p>先是 xor 生成校验位，然后拼接生成短数组 n[88]。</p>
+<p>接着各种运算符操作把 99 位数组变成了 134 位数组。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://a1.boltp.com/2024/11/08/672db4ac172fe.png" alt="image-20241108142834384" data-caption="image-20241108142834384" loading="lazy"></p>
+<p>这里我给七神要了一份还原好后的代码。太多了 自己看的会很头疼</p>
+<h3 id="生成-ab"><a href="#生成-ab" class="headerlink" title="生成 ab"></a>生成 ab</h3><p>版本号数组拼接上面的 134 数组后 RC4，然后 8 位数组 String.fromCharCode 生成的字符串再拼接，最后同样的魔改 B64，得到的结果就是最终 ab。</p>
+<figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #E06C75">n</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">90</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">generateExpandArray</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">n</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">88</span><span style="color: #ABB2BF">]);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #7F848E; font-style: italic">// console.log(generateExpandArray(n[90])); generateExpandArray 是99-&gt;134转化函数。</span></span>
+<span class="line"><span style="color: #E06C75">arr_133</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">n</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">86</span><span style="color: #ABB2BF">].</span><span style="color: #61AFEF">concat</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">n</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">90</span><span style="color: #ABB2BF">]);</span></span>
+<span class="line"><span style="color: #E06C75">n</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">91</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">rc4_encrypt</span><span style="color: #ABB2BF">(</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E5C07B">String</span><span style="color: #ABB2BF">.</span><span style="color: #E5C07B">fromCharCode</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">apply</span><span style="color: #ABB2BF">(</span><span style="color: #D19A66">null</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">arr_133</span><span style="color: #ABB2BF">),</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E5C07B">String</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">fromCharCode</span><span style="color: #ABB2BF">(</span><span style="color: #D19A66">211</span><span style="color: #ABB2BF">)</span></span>
+<span class="line"><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #E06C75">n</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">92</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">String</span><span style="color: #ABB2BF">.</span><span style="color: #E5C07B">fromCharCode</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">apply</span><span style="color: #ABB2BF">(</span><span style="color: #D19A66">null</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">n</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">89</span><span style="color: #ABB2BF">]) </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">n</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">91</span><span style="color: #ABB2BF">];</span></span>
+<span class="line"><span style="color: #E06C75">n</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">93</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">result_encrypt</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">n</span><span style="color: #ABB2BF">[</span><span style="color: #D19A66">92</span><span style="color: #ABB2BF">], </span><span style="color: #98C379">&quot;s4&quot;</span><span style="color: #ABB2BF">); </span><span style="color: #7F848E; font-style: italic">//result_encrypt 魔改base64函数</span></span></code></pre></div></div></figure>
+
+<h2 id="最终结果"><a href="#最终结果" class="headerlink" title="最终结果"></a>最终结果</h2><p>游客身份的二级评论 。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://a1.boltp.com/2024/11/08/672db4c8aadc2.png" alt="image-20241108143229432" data-caption="image-20241108143229432" loading="lazy"></p>
+<p>评论下的继续展开</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://a1.boltp.com/2024/11/08/672db4cfc4b5b.png" alt="image-20241108143931244" data-caption="image-20241108143931244" loading="lazy"></p>
+<h2 id="尾章"><a href="#尾章" class="headerlink" title="尾章"></a>尾章</h2><p>绝大部分文笔都是抄了这篇文章 <a target="_blank" rel="noopener" href="https://www.1997.pro/archives/1728550214689#%E7%9F%AD%E6%95%B0%E7%BB%84%E7%94%9F%E6%88%90">字节系 a_bogus 最新版本插桩分析及还原</a>因为这篇比较新，而且写的文采也比我好就直接拿来复制粘贴了。</p>
+<p>文章参考了:<br><a target="_blank" rel="noopener" href="https://www.1997.pro/archives/1728550214689#%E7%9F%AD%E6%95%B0%E7%BB%84%E7%94%9F%E6%88%90">字节系 a_bogus 最新版本插桩分析及还原</a> ,<br><a target="_blank" rel="noopener" href="https://www.52pojie.cn/thread-1928860-1-1.html">某音 a_bogus 纯算分析 https://www.52pojie.cn/thread-1928860-1-1.html</a> ,<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/Duke_LH/article/details/142920543">a_bogus 逆向纯算</a></p>
+<p>视频参考了:<br><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1QVSJYzEYf/?p=2">最新抖音 JS 逆向 a_bogus【纯算版】</a> 讲得不错就是没后续了。</p>
+<p>以及老大哥七神的帮助。</p>
+
+    
+  </article>
+
+  
+      
+    <div class="nexmoe-post-copyright">
+        <strong>本文作者：</strong>skuukzky<br>
+        <strong>本文链接：</strong><a href="https://lpy30m.github.io/skuukzky.github.io/2024/11/08/%E9%80%86%E5%90%91/a-bogus-1-1-17%E7%89%88%E6%9C%AC%E6%8F%92%E6%A1%A9%E5%88%86%E6%9E%90%E5%8F%8A%E8%BF%98%E5%8E%9F/" title="https:&#x2F;&#x2F;lpy30m.github.io&#x2F;skuukzky.github.io&#x2F;2024&#x2F;11&#x2F;08&#x2F;%E9%80%86%E5%90%91&#x2F;a-bogus-1-1-17%E7%89%88%E6%9C%AC%E6%8F%92%E6%A1%A9%E5%88%86%E6%9E%90%E5%8F%8A%E8%BF%98%E5%8E%9F&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;lpy30m.github.io&#x2F;skuukzky.github.io&#x2F;2024&#x2F;11&#x2F;08&#x2F;%E9%80%86%E5%90%91&#x2F;a-bogus-1-1-17%E7%89%88%E6%9C%AC%E6%8F%92%E6%A1%A9%E5%88%86%E6%9E%90%E5%8F%8A%E8%BF%98%E5%8E%9F&#x2F;</a><br>
+        
+            <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+
+        
+    </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+</div>
+  
+  
+    <script async src="/skuukzky.github.io/js/copy-codeblock.js?v=1731049622881"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          <script src="https://giscus.app/client.js"
+    data-repo="lpy30m/skuukzky.github.io"
+    data-repo-id="R_kgDOMnIPZw"
+    data-category="General"
+    data-category-id="DIC_kwDOMnIPZ84Ch3f5"
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async>
+</script>
+
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8A%96%E9%9F%B3-a-bogus-%E5%88%86%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">抖音 a_bogus 分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-number">1.1.</span> <span class="toc-text">分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#url-%E5%8A%A0%E5%AF%86"><span class="toc-number">1.1.1.</span> <span class="toc-text">url 加密</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ua-%E5%8A%A0%E5%AF%86"><span class="toc-number">1.1.2.</span> <span class="toc-text">ua 加密</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%88%E6%9C%AC%E5%8F%B7%E5%A4%84%E7%90%86"><span class="toc-number">1.1.3.</span> <span class="toc-text">版本号处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%AD%E6%95%B0%E7%BB%84%E7%94%9F%E6%88%90"><span class="toc-number">1.1.4.</span> <span class="toc-text">短数组生成</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E7%AE%97%E6%B3%95"><span class="toc-number">1.1.5.</span> <span class="toc-text">随机数生成算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%AD%E6%95%B0%E7%BB%84%E8%BD%AC%E9%95%BF%E6%95%B0%E7%BB%84"><span class="toc-number">1.1.6.</span> <span class="toc-text">短数组转长数组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E6%88%90-ab"><span class="toc-number">1.1.7.</span> <span class="toc-text">生成 ab</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E7%BB%88%E7%BB%93%E6%9E%9C"><span class="toc-number">1.2.</span> <span class="toc-text">最终结果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%BE%E7%AB%A0"><span class="toc-number">1.3.</span> <span class="toc-text">尾章</span></a></li></ol></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2058306854838448" crossorigin="anonymous"></script>
+</div><!-- hexo injector body_end start -->
+  <script>
+  const CODE_CONFIG = {
+    beautify: false,
+    highlightCopy: true,
+    highlightLang: false,
+    highlightHeightLimit: 360,
+    isHighlightShrink: false,
+    copy: {
+      success: 'Copy Success',
+      error: 'Copy Error',
+      noSupport: 'Browser Not Support',
+    }
+  };
+  console.log(
+    `%c hexo-shiki-plugin %c v1.0.27 %c https://github.com/nova1751/hexo-shiki-plugin`,
+    "color: #fff; background: #5f5f5f",
+    "color: #fff; background: #80c8f8",
+    ""
+  );
+  </script>
+  <!-- hexo injector body_end end --></body></html>
