@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>Tiktok X-Gnarly jsvmp算法还原 - skuukzky</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<meta name="description" content="Tiktok X-Gnarly jsvmp算法还原导言前几天偶然在群里看到一个github仓库 具体内容大家可以自行看看，总的内容就是对tk的vmpwebmssdk.js进行去混淆和反编译，但当我查看的时候，tk已经进行了更新，并且还多出来了一个X-Gnarly的参数，我功力不够，无法对新版本的进行VM虚拟机的还原，所以本篇文章就只能用千篇一律的插桩和分析进行逆向还原了，如果有高手能够还原VM，期">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tiktok X-Gnarly jsvmp算法还原">
+<meta property="og:url" content="https://lpy30m.github.io/skuukzky.github.io/2025/04/26/%E9%80%86%E5%90%91/Tiktok-X-Gnarly-jsvmp%E7%AE%97%E6%B3%95%E8%BF%98%E5%8E%9F/index.html">
+<meta property="og:site_name" content="skuukzky">
+<meta property="og:description" content="Tiktok X-Gnarly jsvmp算法还原导言前几天偶然在群里看到一个github仓库 具体内容大家可以自行看看，总的内容就是对tk的vmpwebmssdk.js进行去混淆和反编译，但当我查看的时候，tk已经进行了更新，并且还多出来了一个X-Gnarly的参数，我功力不够，无法对新版本的进行VM虚拟机的还原，所以本篇文章就只能用千篇一律的插桩和分析进行逆向还原了，如果有高手能够还原VM，期">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745633394_680c40723d0fcf4901840.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745633869_680c424ddbab0a2393c38.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745638490_680c545a86ba10e5381b8.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745638727_680c5547e953470a41169.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745639173_680c5705c03486b016b9b.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745639375_680c57cf5c0fc86d3b0ca.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745639675_680c58fbd8ea04cb122db.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745639966_680c5a1eae1707a5db69c.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745640001_680c5a4108b8d5d84cf3a.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745640130_680c5ac2471d49578918b.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745640229_680c5b2576fa92a54ec5b.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745640457_680c5c099c2289ea14a48.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745641311_680c5f5f81a90b683610e.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745641346_680c5f821febddf207ce1.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745641301_680c5f55b7c4a01c74f37.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745641564_680c605c369b65081f767.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745642009_680c62193630c1e7adbd4.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745642269_680c631dbf2e9b2558c92.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745643788_680c690cd3e1272bb55e7.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745644275_680c6af308a5ac6dc1da0.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745644825_680c6d19a00483eccaa6c.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745645323_680c6f0b72f3015107df5.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745646854_680c750667013f1873fbb.png">
+<meta property="og:image" content="https://image.3001.net/images/20250426/1745647804_680c78bc870a3c04f774d.png">
+<meta property="article:published_time" content="2025-04-26T06:12:13.000Z">
+<meta property="article:modified_time" content="2025-04-26T06:19:22.672Z">
+<meta property="article:author" content="skuukzky">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://image.3001.net/images/20250426/1745633394_680c40723d0fcf4901840.png">
+
+<link rel="stylesheet" href="/skuukzky.github.io/lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="/skuukzky.github.io/lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="/skuukzky.github.io/lib/iconfont/iconfont.css?v=1745648378410">
+
+<link rel="stylesheet" href="/skuukzky.github.io/css/style.css?v=1745648378410">
+
+
+
+
+    
+        <link rel="stylesheet" href="/skuukzky.github.io/custom.css?v=1745648378410">
+    
+
+
+
+<script src="/skuukzky.github.io/lib/mdui_043tiny/mdui.js" async></script>
+<script src="/skuukzky.github.io/lib/fancybox/fancybox.umd.js" async></script>
+<script src="/skuukzky.github.io/lib/lax.min.js" async></script>
+
+
+<script async src="/skuukzky.github.io/js/app.js?v=1745648378410"></script>
+
+ 
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4D4ZJ9G024"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag("js", new Date());
+
+  gtag("config", "G-4D4ZJ9G024");
+</script>
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-shiki-plugin@latest/lib/codeblock.css">
+<style>:root{--hl-color:#abb2bf;--hl-bg:#282c34;--hltools-bg:#21252b;--hltools-color:#bbbbbc;--hlnumber-bg:#282c34;--hlnumber-color:#495162;--hlscrollbar-bg:#373c47;--hlexpand-bg:linear-gradient(180deg,rgba(40,44,52,0.1),rgba(40,44,52,0.9))}</style>
+    <style>
+    .code-expand-btn:not(.expand-done) ~ div.codeblock,
+    .code-expand-btn:not(.expand-done) ~ * div.codeblock {
+      overflow: hidden;
+      height: 360px;
+    }
+    </style>
+  <!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(https://image.3001.net/images/20250307/1741314829_67ca5b0d4957ea5241ba3.png)"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="/skuukzky.github.io/" title="skuukzky"><img src="https://image.3001.net/images/20250307/1741314773_67ca5ad59320935fabc37.png" alt="skuukzky"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/skuukzky.github.io/" title="skuukzky">
+            <img src="https://image.3001.net/images/20250307/1741314773_67ca5ad59320935fabc37.png" alt="skuukzky" alt="skuukzky">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>文章</span>12</div>
+        <div><span>标签</span>0</div>
+        <div><span>分类</span>2</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/" title="回到首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                回到首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/archive.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/PY.html" title="我的朋友">
+            <i class="mdui-list-item-icon nexmoefont icon-unorderedlist"></i>
+            <div class="mdui-list-item-content">
+                我的朋友
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/donate.html" title="给我赞助">
+            <i class="mdui-list-item-icon nexmoefont icon-coffee"></i>
+            <div class="mdui-list-item-content">
+                给我赞助
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/about.html" title="关于博主">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于博主
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+         
+            <form id="search_form" action_e="https://cn.bing.com/search?q=site:nexmoe.com" onsubmit="return search();">
+                <label><input id="search_value" name="q" type="search" placeholder="搜索"></label>
+            </form>
+         
+    </div>
+</div>
+
+
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="https://space.bilibili.com/603975910"
+			target="_blank"
+			mdui-tooltip="{content: '哔哩哔哩'}"
+			style="
+				color: rgb(231, 106, 141);
+				background-color: rgba(231, 106, 141, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/lpy30m/"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://nexmoe.com/atom.xml"
+			target="_blank"
+			mdui-tooltip="{content: 'RSS'}"
+			style="
+				color: rgb(247, 132, 34);
+				background-color: rgba(247, 132, 34, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-rss"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章分类</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/skuukzky.github.io/categories/逆向/">逆向</a>
+          <span class="category-list-count">8</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/skuukzky.github.io/categories/验证码识别/">验证码识别</a>
+          <span class="category-list-count">3</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+    
+        
+        
+    
+        
+        
+        
+        
+   
+    <div class="nexmoe-copyright">
+        &copy; 2025 skuukzky
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        <br><a target="_blank" href="https://beian.miit.gov.cn/"></a>
+
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover absolute" style="padding-top: 37.5%;"> 
+            <img src="https://image.3001.net/images/20250426/1745647999_680c797f21a5582e0b6db.png" alt="Tiktok X-Gnarly jsvmp算法还原" loading="lazy">
+            <h1>Tiktok X-Gnarly jsvmp算法还原</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2025年04月26日</a>
+        
+            <a class="nexmoefont icon-appstore-fill -link" href="/skuukzky.github.io/categories/%E9%80%86%E5%90%91/">逆向</a>
+        
+        
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <h1 id="Tiktok-X-Gnarly-jsvmp算法还原"><a href="#Tiktok-X-Gnarly-jsvmp算法还原" class="headerlink" title="Tiktok X-Gnarly jsvmp算法还原"></a>Tiktok X-Gnarly jsvmp算法还原</h1><h2 id="导言"><a href="#导言" class="headerlink" title="导言"></a>导言</h2><p>前几天偶然在群里看到一个<a target="_blank" rel="noopener" href="https://github.com/LukasOgunfeitimi/TikTok-ReverseEngineering">github仓库</a> 具体内容大家可以自行看看，总的内容就是对tk的vmp<code>webmssdk.js</code>进行去混淆和反编译，但当我查看的时候，tk已经进行了更新，并且还多出来了一个<code>X-Gnarly</code>的参数，我功力不够，无法对新版本的进行VM虚拟机的还原，所以本篇文章就只能用千篇一律的插桩和分析进行逆向还原了，如果有高手能够还原VM，期待你的文章。</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>虽然，无法还原VM，但是去混淆的思路，还是可以借用他的。</p>
+<p>附上Deepseek和仓库原作者的还原思路后的AST代码</p>
+<figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">fs</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">require</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&#39;fs&#39;</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">path</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">require</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&#39;path&#39;</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">parser</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">require</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&#39;@babel/parser&#39;</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">traverse</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">require</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&#39;@babel/traverse&#39;</span><span style="color: #ABB2BF">).</span><span style="color: #E06C75">default</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">t</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">require</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&#39;@babel/types&#39;</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">generator</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">require</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&#39;@babel/generator&#39;</span><span style="color: #ABB2BF">).</span><span style="color: #E06C75">default</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #7F848E; font-style: italic">// 输入输出配置</span></span>
+<span class="line"><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">inputPath</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #98C379">&#39;./ems1.js&#39;</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">outputPath</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #98C379">&#39;./output.js&#39;</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #7F848E; font-style: italic">// 读取源代码</span></span>
+<span class="line"><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">code</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">fs</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">readFileSync</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">inputPath</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&#39;utf-8&#39;</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #7F848E; font-style: italic">// 解析AST</span></span>
+<span class="line"><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">ast</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">parser</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">parse</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">code</span><span style="color: #ABB2BF">, {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">sourceType</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&#39;unambiguous&#39;</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">plugins</span><span style="color: #ABB2BF">: [</span><span style="color: #98C379">&#39;jsx&#39;</span><span style="color: #ABB2BF">]</span></span>
+<span class="line"><span style="color: #ABB2BF">});</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">functionMap</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">new</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">Map</span><span style="color: #ABB2BF">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #7F848E; font-style: italic">// ========== 第一步：提取yg数组中的匿名函数，替换为具名引用，并在就地插入具名函数声明 ==========</span></span>
+<span class="line"><span style="color: #61AFEF">traverse</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">ast</span><span style="color: #ABB2BF">, {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #61AFEF">VariableDeclarator</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75; font-style: italic">path</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #C678DD">if</span><span style="color: #ABB2BF"> (</span></span>
+<span class="line"><span style="color: #ABB2BF">            </span><span style="color: #E5C07B">t</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">isIdentifier</span><span style="color: #ABB2BF">(</span><span style="color: #E5C07B">path</span><span style="color: #ABB2BF">.</span><span style="color: #E5C07B">node</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">id</span><span style="color: #ABB2BF">, { </span><span style="color: #E06C75">name</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&#39;yg&#39;</span><span style="color: #ABB2BF"> }) </span><span style="color: #56B6C2">&amp;&amp;</span></span>
+<span class="line"><span style="color: #ABB2BF">            </span><span style="color: #E5C07B">t</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">isArrayExpression</span><span style="color: #ABB2BF">(</span><span style="color: #E5C07B">path</span><span style="color: #ABB2BF">.</span><span style="color: #E5C07B">node</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">init</span><span style="color: #ABB2BF">)</span></span>
+<span class="line"><span style="color: #ABB2BF">        ) {</span></span>
+<span class="line"><span style="color: #ABB2BF">            </span><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">elements</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">path</span><span style="color: #ABB2BF">.</span><span style="color: #E5C07B">node</span><span style="color: #ABB2BF">.</span><span style="color: #E5C07B">init</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">elements</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">            </span><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">insertions</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> [];</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #ABB2BF">            </span><span style="color: #E5C07B">elements</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">forEach</span><span style="color: #ABB2BF">((</span><span style="color: #E06C75; font-style: italic">element</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75; font-style: italic">index</span><span style="color: #ABB2BF">) </span><span style="color: #C678DD">=&gt;</span><span style="color: #ABB2BF"> {</span></span>
+<span class="line"><span style="color: #ABB2BF">                </span><span style="color: #C678DD">if</span><span style="color: #ABB2BF"> (</span><span style="color: #E5C07B">t</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">isFunctionExpression</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">element</span><span style="color: #ABB2BF">) </span><span style="color: #56B6C2">||</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">t</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">isArrowFunctionExpression</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">element</span><span style="color: #ABB2BF">)) {</span></span>
+<span class="line"><span style="color: #ABB2BF">                    </span><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">funcName</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #98C379">`Ab</span><span style="color: #C678DD">${</span><span style="color: #E06C75">index</span><span style="color: #C678DD">}</span><span style="color: #98C379">`</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #ABB2BF">                    </span><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">funcDeclaration</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">t</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">functionDeclaration</span><span style="color: #ABB2BF">(</span></span>
+<span class="line"><span style="color: #ABB2BF">                        </span><span style="color: #E5C07B">t</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">identifier</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">funcName</span><span style="color: #ABB2BF">),</span></span>
+<span class="line"><span style="color: #ABB2BF">                        </span><span style="color: #E5C07B">element</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">params</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">                        </span><span style="color: #E5C07B">t</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">isBlockStatement</span><span style="color: #ABB2BF">(</span><span style="color: #E5C07B">element</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">body</span><span style="color: #ABB2BF">) </span><span style="color: #C678DD">?</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">element</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">body</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">:</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">t</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">blockStatement</span><span style="color: #ABB2BF">([</span><span style="color: #E5C07B">t</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">returnStatement</span><span style="color: #ABB2BF">(</span><span style="color: #E5C07B">element</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">body</span><span style="color: #ABB2BF">)]),</span></span>
+<span class="line"><span style="color: #ABB2BF">                        </span><span style="color: #E5C07B">element</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">generator</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">                        </span><span style="color: #E5C07B">element</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">async</span></span>
+<span class="line"><span style="color: #ABB2BF">                    );</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #ABB2BF">                    </span><span style="color: #E5C07B">functionMap</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">set</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">index</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">funcName</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #ABB2BF">                    </span><span style="color: #7F848E; font-style: italic">// 替换数组中的函数为具名函数标识符</span></span>
+<span class="line"><span style="color: #ABB2BF">                    </span><span style="color: #E06C75">elements</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">index</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">t</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">identifier</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">funcName</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #ABB2BF">                    </span><span style="color: #7F848E; font-style: italic">// 保存要插入的位置和内容</span></span>
+<span class="line"><span style="color: #ABB2BF">                    </span><span style="color: #E5C07B">insertions</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">push</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">funcDeclaration</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #ABB2BF">                }</span></span>
+<span class="line"><span style="color: #ABB2BF">            });</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #ABB2BF">            </span><span style="color: #7F848E; font-style: italic">// 在当前 VariableDeclaration 后面插入所有函数声明</span></span>
+<span class="line"><span style="color: #ABB2BF">            </span><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">declPath</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">path</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">findParent</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75; font-style: italic">p</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">=&gt;</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">p</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">isVariableDeclaration</span><span style="color: #ABB2BF">());</span></span>
+<span class="line"><span style="color: #ABB2BF">            </span><span style="color: #E5C07B">insertions</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">reverse</span><span style="color: #ABB2BF">().</span><span style="color: #61AFEF">forEach</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75; font-style: italic">fn</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">=&gt;</span><span style="color: #ABB2BF"> {</span></span>
+<span class="line"><span style="color: #ABB2BF">                </span><span style="color: #E5C07B">declPath</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">insertAfter</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">fn</span><span style="color: #ABB2BF">); </span><span style="color: #7F848E; font-style: italic">// 就地插入每个函数定义</span></span>
+<span class="line"><span style="color: #ABB2BF">            });</span></span>
+<span class="line"><span style="color: #ABB2BF">        }</span></span>
+<span class="line"><span style="color: #ABB2BF">    }</span></span>
+<span class="line"><span style="color: #ABB2BF">});</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #7F848E; font-style: italic">// ========== 第二步：替换yg[索引](args) 为 AbX(args) ==========</span></span>
+<span class="line"><span style="color: #61AFEF">traverse</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">ast</span><span style="color: #ABB2BF">, {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #61AFEF">CallExpression</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75; font-style: italic">path</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">callee</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">path</span><span style="color: #ABB2BF">.</span><span style="color: #E5C07B">node</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">callee</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #C678DD">if</span><span style="color: #ABB2BF"> (</span></span>
+<span class="line"><span style="color: #ABB2BF">            </span><span style="color: #E5C07B">t</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">isMemberExpression</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">callee</span><span style="color: #ABB2BF">) </span><span style="color: #56B6C2">&amp;&amp;</span></span>
+<span class="line"><span style="color: #ABB2BF">            </span><span style="color: #E5C07B">t</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">isIdentifier</span><span style="color: #ABB2BF">(</span><span style="color: #E5C07B">callee</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">object</span><span style="color: #ABB2BF">, { </span><span style="color: #E06C75">name</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&#39;yg&#39;</span><span style="color: #ABB2BF"> }) </span><span style="color: #56B6C2">&amp;&amp;</span></span>
+<span class="line"><span style="color: #ABB2BF">            </span><span style="color: #E5C07B">t</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">isNumericLiteral</span><span style="color: #ABB2BF">(</span><span style="color: #E5C07B">callee</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">property</span><span style="color: #ABB2BF">)</span></span>
+<span class="line"><span style="color: #ABB2BF">        ) {</span></span>
+<span class="line"><span style="color: #ABB2BF">            </span><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">index</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">callee</span><span style="color: #ABB2BF">.</span><span style="color: #E5C07B">property</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">value</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #ABB2BF">            </span><span style="color: #C678DD">if</span><span style="color: #ABB2BF"> (</span><span style="color: #E5C07B">functionMap</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">has</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">index</span><span style="color: #ABB2BF">)) {</span></span>
+<span class="line"><span style="color: #ABB2BF">                </span><span style="color: #E5C07B">path</span><span style="color: #ABB2BF">.</span><span style="color: #E5C07B">node</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">callee</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">t</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">identifier</span><span style="color: #ABB2BF">(</span><span style="color: #E5C07B">functionMap</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">get</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">index</span><span style="color: #ABB2BF">));</span></span>
+<span class="line"><span style="color: #ABB2BF">            }</span></span>
+<span class="line"><span style="color: #ABB2BF">        }</span></span>
+<span class="line"><span style="color: #ABB2BF">    }</span></span>
+<span class="line"><span style="color: #ABB2BF">});</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #7F848E; font-style: italic">// ========== 生成最终代码 ==========</span></span>
+<span class="line"><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">output</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">generator</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">ast</span><span style="color: #ABB2BF">, {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">retainLines</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">false</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">comments</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">true</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">jsescOption</span><span style="color: #ABB2BF">: { </span><span style="color: #E06C75">minimal</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">true</span><span style="color: #ABB2BF"> }</span></span>
+<span class="line"><span style="color: #ABB2BF">}).</span><span style="color: #E06C75">code</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #E5C07B">fs</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">writeFileSync</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">outputPath</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">output</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #E5C07B">console</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">log</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&#39;✅ 处理完成，函数已就地替换！&#39;</span><span style="color: #ABB2BF">);</span></span></code></pre></div></div></figure>
+
+<p>这个时候，我们去代码中搜索<code>X-Gnarly</code></p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745633394_680c40723d0fcf4901840.png" alt="image-20250426100951117" data-caption="image-20250426100951117" loading="lazy"></p>
+<p>xn是XB.On是XG,所以我们全局搜索 On看看哪里进行了调用，顺便也看看附近有没有xn ，方便我们定位到，我们在把解混淆后的放入网页中替换。一共两处，然后打上断点触发，这里断住了，我们分析参数，</p>
+<figure class="shiki"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">a = bn(i, t)),</span></span>
+<span class="line"><span style="color: #abb2bf">i：&#39;WebIdLastTime=1742522342&amp;aid=1988&amp;app_language=zh-Hans&amp;app_name=tiktok_web&amp;browser_language=zh-CN&amp;browser_name=..... (太长省略)&#39;</span></span>
+<span class="line"><span style="color: #abb2bf">t: &quot;&quot; (Get请求)</span></span>
+<span class="line"><span style="color: #abb2bf">t:{&quot;magic&quot;:538969122,&quot;version&quot;:1,&quot;dataType&quot;:8,&quot;strData&quot;:&quot;38NyodcW9CLhuMe299J/...</span></span>
+<span class="line"><span style="color: #abb2bf">和Xb差不多，此请求是Get。所以请求i是params，t是&quot;&quot;，如果是Get，则i是参数，t是data</span></span></code></pre></div></div></figure>
+
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745633869_680c424ddbab0a2393c38.png" alt="image-20250426101746723" data-caption="image-20250426101746723" loading="lazy"></p>
+<p>显然就是bn函数生成了，进入bn函数，然后发现是Ab9函数,上下浏览关键的就是这个do循环</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745638490_680c545a86ba10e5381b8.png" alt="image-20250426113449815" data-caption="image-20250426113449815" loading="lazy"></p>
+<p>在进入h函数就已经是经典的jsvmp桥段了。</p>
+<h2 id="插桩"><a href="#插桩" class="headerlink" title="插桩"></a>插桩</h2><p>插桩可以看这两篇文章<br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/MHaKy12G8VDD23-a7tMRXg">JS逆向技巧：日志断点如何正确输出 JSON 而不报错</a></p>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/byWWpP7fJ5kTh9rYYjqBSQ">【逆向案例】巨量算数响应体vmp-decode</a></p>
+<p>正巧的是第二篇文章和tk一样同为字节开发的，插桩流程也是一样。</p>
+<figure class="shiki"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">(H = W[&quot;apply&quot;](V, Q),v[++l] = H)</span></span>
+<span class="line"><span style="color: #abb2bf">&quot;对象V: &quot;, JSON.stringify(V,function(k, v) {if (v === window) {return &#39;window&#39;} return v}), &quot;函数W: &quot;, W.toString(), &quot;参数Q: &quot;, JSON.stringify(Q,function(k, v) {if (v === window) {return &#39;window&#39;} return v}), &quot;结果H: &quot;, H</span></span>
+<span class="line"><span style="color: #abb2bf">	</span></span>
+<span class="line"><span style="color: #abb2bf"> H = new (Function.bind[&quot;apply&quot;](B, z))();</span></span>
+<span class="line"><span style="color: #abb2bf">&quot;函数B: &quot;, B.toString(), &quot;参数z: &quot;, JSON.stringify(z), 结果H: &quot;, H</span></span>
+<span class="line"><span style="color: #abb2bf"></span></span>
+<span class="line"><span style="color: #abb2bf">JSON.stringify(V,function(k, v) {if (v === window) {return &#39;window&#39;} return v})</span></span></code></pre></div></div></figure>
+
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745638727_680c5547e953470a41169.png" alt="image-20250426113847235" data-caption="image-20250426113847235" loading="lazy"></p>
+<h2 id="还原"><a href="#还原" class="headerlink" title="还原"></a>还原</h2><p>先从上到下观察浏览器日志，</p>
+<p>发现这里应该是环境检测，格式化检测和自动化检测，下面还有环境检测很多，继续观察。</p>
+<p>![image-20250426114212337](&#x2F;Users&#x2F;jiangxia&#x2F;Library&#x2F;Application Support&#x2F;typora-user-images&#x2F;image-20250426114212337.png)</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745639173_680c5705c03486b016b9b.png" alt="image-20250426114612815" data-caption="image-20250426114612815" loading="lazy"></p>
+<p>这里发现了一些东西，3个32位的值(？md5)和时间戳获取，时间戳肯定是毋庸置疑，我们看一下这3个东西是否为md5，可以看到就在上面，经过一个匿名函数，我们放入CyberChef验证一下,依次验证发现分别对应的是,url后缀params的md5和参数data的md5和user-agent的md5</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745639375_680c57cf5c0fc86d3b0ca.png" alt="image-20250426114934148" data-caption="image-20250426114934148" loading="lazy"></p>
+<p>继续查看</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745639675_680c58fbd8ea04cb122db.png" alt="image-20250426115435044" data-caption="image-20250426115435044" loading="lazy"></p>
+<p>这里看到他在push数组，而这4个数组是什么呢，我们看到了 一个关键函数 <code>setUint16()</code> 如果你还不是明白可以问Deepseek或者朋友，这里我去请教了下福生大佬啊，他直接一眼顶真 告诉我这是 <code>Uint8Array</code></p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745639966_680c5a1eae1707a5db69c.png" alt="image-20250426115925972" data-caption="image-20250426115925972" loading="lazy"></p>
+<p>接着问了下gpt 的确如此啊，然后让他转一下方法 就出来了</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745640001_680c5a4108b8d5d84cf3a.png" alt="image-20250426120000274" data-caption="image-20250426120000274" loading="lazy"></p>
+<figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">function</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">uInt32sToBytesLE</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75; font-style: italic">uint32Array</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">resultBytes</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> [];</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">for</span><span style="color: #ABB2BF"> (</span><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">value</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">of</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">uint32Array</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #7F848E; font-style: italic">// 为每个 32 位整数创建 4 字节的缓冲区</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">buffer</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">new</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">ArrayBuffer</span><span style="color: #ABB2BF">(</span><span style="color: #D19A66">4</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">dataView</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">new</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">DataView</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">buffer</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #7F848E; font-style: italic">// 按小端序写入整数</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #E5C07B">dataView</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">setUint32</span><span style="color: #ABB2BF">(</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">value</span><span style="color: #ABB2BF">, </span><span style="color: #D19A66">false</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #7F848E; font-style: italic">// 提取字节并合并到结果数组</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #E5C07B">resultBytes</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">push</span><span style="color: #ABB2BF">(...</span><span style="color: #C678DD">new</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">Uint8Array</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">buffer</span><span style="color: #ABB2BF">));</span></span>
+<span class="line"><span style="color: #ABB2BF">    }</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">return</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">resultBytes</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #7F848E; font-style: italic">// 测试数据</span></span>
+<span class="line"><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">e</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> [</span><span style="color: #D19A66">556645436</span><span style="color: #ABB2BF">]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #7F848E; font-style: italic">// 转换为字节数组</span></span>
+<span class="line"><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">array_test_two</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">uInt32sToBytesLE</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">e</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #E5C07B">console</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">log</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">array_test_two</span><span style="color: #ABB2BF">);</span></span></code></pre></div></div></figure>
+
+<p>这里的e也就是图中的 <code>[&#123;&quot;0&quot;:556645436,&quot;1&quot;:1,&quot;2&quot;:14,&quot;3&quot;:&quot;c20e522f3995433f755e282ec81bb40a&quot;,&quot;4&quot;:&quot;7226faf67640367ae589dea1020b0ab9&quot;,&quot;5&quot;:&quot;1b04588d93b1afac45573a43b9e15594&quot;,&quot;6&quot;:1745638813,&quot;7&quot;:1245783967,&quot;8&quot;:56675889,&quot;9&quot;:&quot;5.1.0&quot;&#125;]</code>中的0元素。</p>
+<p>继续查看</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745640130_680c5ac2471d49578918b.png" alt="image-20250426120209511" data-caption="image-20250426120209511" loading="lazy"></p>
+<p>这里也把url的md5值转<code>Uint8Array</code>也push进数组，剩下就是相同操作了,把上文中数据全部按此操作加入到数组中，最后的得到push完的数组了。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745640229_680c5b2576fa92a54ec5b.png" alt="image-20250426120348612" data-caption="image-20250426120348612" loading="lazy"></p>
+<p>继续查看，发现在把这个数组利用<code>fromCharCode</code>专为字符串。也就是后文中的第一个乱码字符串。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745640457_680c5c099c2289ea14a48.png" alt="image-20250426120736687" data-caption="image-20250426120736687" loading="lazy"></p>
+<p>继续查看他这里在取随机数* 固定值 4294967296 在进Math.floor之后 继续转<code>Uint8Array</code></p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745641311_680c5f5f81a90b683610e.png" alt="image-20250426120950823" data-caption="image-20250426120950823" loading="lazy"></p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745641346_680c5f821febddf207ce1.png" alt="image-20250426122216362" data-caption="image-20250426122216362" loading="lazy"></p>
+<p>![image-20250426121110507](&#x2F;Users&#x2F;jiangxia&#x2F;Library&#x2F;Application Support&#x2F;typora-user-images&#x2F;image-20250426121110507.png)</p>
+<figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">function</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">generateRandomIntegers</span><span style="color: #ABB2BF">() {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">return</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">Array</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">from</span><span style="color: #ABB2BF">({ </span><span style="color: #E06C75">length</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">12</span><span style="color: #ABB2BF"> }, () </span><span style="color: #C678DD">=&gt;</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #E5C07B">Math</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">floor</span><span style="color: #ABB2BF">(</span><span style="color: #E5C07B">Math</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">random</span><span style="color: #ABB2BF">() </span><span style="color: #56B6C2">*</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">4294967296</span><span style="color: #ABB2BF">)</span></span>
+<span class="line"><span style="color: #ABB2BF">    );</span></span>
+<span class="line"><span style="color: #ABB2BF">}</span></span></code></pre></div></div></figure>
+
+
+
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745641301_680c5f55b7c4a01c74f37.png" alt="image-20250426122140635" data-caption="image-20250426122140635" loading="lazy"></p>
+<p>这里说一下经过函数Ab22的几个参数</p>
+<p>第一个上文根据随机数相乘后得到的12个数组，第二个是16暂时我们不知道，第三个参数就是我们152数组转字符串的，最后结果得到是一个乱码。</p>
+<h3 id="Ab22"><a href="#Ab22" class="headerlink" title="Ab22"></a>Ab22</h3><p>现在我们来探寻一下这个16是什么怎么来的，</p>
+<p>来到函数h的部分，在这里打上日志</p>
+<p><code>e,c,JSON.stringify(v)</code></p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745641564_680c605c369b65081f767.png" alt="image-20250426122603556" data-caption="image-20250426122603556" loading="lazy"></p>
+<p>在Ab22函数中打上断点，防止日志过多，</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745642009_680c62193630c1e7adbd4.png" alt="image-20250426123328227" data-caption="image-20250426123328227" loading="lazy"></p>
+<p>现在我们观察这个14是怎么来的就好了，现在一步步往上追，这里不带着一步步追了，单看一个部分，就能理解了</p>
+<p>我们发现在日志上，他都是和我们这12位数组相关的，这里我是倒着看</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745642269_680c631dbf2e9b2558c92.png" alt="image-20250426123748766" data-caption="image-20250426123748766" loading="lazy"></p>
+<p>截取一些日志</p>
+<figure class="shiki"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">首先通读一遍. </span></span>
+<span class="line"><span style="color: #abb2bf">					看到了15</span></span>
+<span class="line"><span style="color: #abb2bf"> 46 74 &#39;[3737565922,15,3737565922,4294967296,null,2,32,[7,1245783967],[8,1640124884],[9,&quot;5.1.0&quot;],&quot;5.1.0&quot;,&quot;$chrome_asyncScriptInfo&quot;,&quot;__$webdriverAsyncExecutor&quot;]&#39;</span></span>
+<span class="line"><span style="color: #abb2bf">					在经过下一步运算且就多了2  还是有个15</span></span>
+<span class="line"><span style="color: #abb2bf"> 49 75 &#39;[2,15,3737565922,4294967296,null,2,32,[7,1245783967],[8,1640124884],[9,&quot;5.1.0&quot;],&quot;5.1.0&quot;,&quot;$chrome_asyncScriptInfo&quot;,&quot;__$webdriverAsyncExecutor&quot;]&#39;</span></span>
+<span class="line"><span style="color: #abb2bf">				 且有了个14,也不清楚怎么来的</span></span>
+<span class="line"><span style="color: #abb2bf"> 21 78 &#39;[2,14,3737565922,4294967296,null,2,32,[7,1245783967],[8,1640124884],[9,&quot;5.1.0&quot;],&quot;5.1.0&quot;,&quot;$chrome_asyncScriptInfo&quot;,&quot;__$webdriverAsyncExecutor&quot;]&#39;</span></span>
+<span class="line"><span style="color: #abb2bf">				然后有了个16，应该是2+14来的，14应该是上文的14</span></span>
+<span class="line"><span style="color: #abb2bf"> 5 79 &#39;[16,14,3737565922,4294967296,null,2,32,[7,1245783967],[8,1640124884],[9,&quot;5.1.0&quot;],&quot;5.1.0&quot;,&quot;$chrome_asyncScriptInfo&quot;,&quot;__$webdriverAsyncExecutor&quot;]&#39;</span></span>
+<span class="line"><span style="color: #abb2bf">				还是有个15 不清楚怎么来的</span></span>
+<span class="line"><span style="color: #abb2bf"> 46 81 &#39;[16,15,3737565922,4294967296,null,2,32,[7,1245783967],[8,1640124884],[9,&quot;5.1.0&quot;],&quot;5.1.0&quot;,&quot;$chrome_asyncScriptInfo&quot;,&quot;__$webdriverAsyncExecutor&quot;]&#39;</span></span>
+<span class="line"><span style="color: #abb2bf">				这里多出来了个0 </span></span>
+<span class="line"><span style="color: #abb2bf"> 71 82 &#39;[0,15,3737565922,4294967296,null,2,32,[7,1245783967],[8,1640124884],[9,&quot;5.1.0&quot;],&quot;5.1.0&quot;,&quot;$chrome_asyncScriptInfo&quot;,&quot;__$webdriverAsyncExecutor&quot;]&#39;</span></span>
+<span class="line"><span style="color: #abb2bf"> 49 85 &#39;[0,15,3737565922,4294967296,null,2,32,[7,1245783967],[8,1640124884],[9,&quot;5.1.0&quot;],&quot;5.1.0&quot;,&quot;$chrome_asyncScriptInfo&quot;,&quot;__$webdriverAsyncExecutor&quot;]&#39;</span></span></code></pre></div></div></figure>
+
+<p> 我们先解决最容易解决的</p>
+<p>3737565922,15 是怎么变成2的  我的建议是在各种运算符中插上运算，方便你更好的观察。</p>
+<p>这里不卖关子，<code>3737565922&amp;15 </code>是进行&amp;变成了2 </p>
+<p>多进行几次日志的保存可以发现 15是固定的，那么就可以有个猜测，凡是第二位是15的基本都是要进行&amp;操作的</p>
+<p>那这个12呢，其实一共有12个数组，这里是一小部分，往上查找一下，12其实是上一个整体运算得到的结果，</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745643788_680c690cd3e1272bb55e7.png" alt="image-20250426130308162" data-caption="image-20250426130308162" loading="lazy"></p>
+<p>那么16 应该就是 <code>14+2 (3737565922&amp;15) +2(前面的 2 &amp;15 )</code>了 </p>
+<p>那么16,15是怎么变成0的呢？</p>
+<p>其实还是和上面一个道理 <code>16&amp;15</code></p>
+<p>那么其实整体就明白了</p>
+<p> 数组一中的 <code>3737565922 &amp;15 = 2</code>  加上&amp;后的结果上文的 14 结果&#x3D; 16 &amp; 15 &#x3D; 0 </p>
+<p>这里听着可能迷糊</p>
+<p>再来一组就好</p>
+<figure class="shiki"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">46 74 &#39;[3624428041,15,3624428041,4294967296,null,2,32,[7,1245783967],[8,1640124884],[9,&quot;5.1.0&quot;],&quot;5.1.0&quot;,&quot;$chrome_asyncScriptInfo&quot;,&quot;__$webdriverAsyncExecutor&quot;]&#39;</span></span>
+<span class="line"><span style="color: #abb2bf">3624428041 &amp; 15 = 9</span></span>
+<span class="line"><span style="color: #abb2bf"> 49 75 &#39;[9,15,3624428041,4294967296,null,2,32,[7,1245783967],[8,1640124884],[9,&quot;5.1.0&quot;],&quot;5.1.0&quot;,&quot;$chrome_asyncScriptInfo&quot;,&quot;__$webdriverAsyncExecutor&quot;]&#39;</span></span>
+<span class="line"><span style="color: #abb2bf">		9 &amp;15 = 9  0上上文运算的0  </span></span>
+<span class="line"><span style="color: #abb2bf"> 21 78 &#39;[9,0,3624428041,4294967296,null,2,32,[7,1245783967],[8,1640124884],[9,&quot;5.1.0&quot;],&quot;5.1.0&quot;,&quot;$chrome_asyncScriptInfo&quot;,&quot;__$webdriverAsyncExecutor&quot;]&#39;</span></span>
+<span class="line"><span style="color: #abb2bf">			9+0 = 0</span></span>
+<span class="line"><span style="color: #abb2bf"> 5 79 &#39;[9,0,3624428041,4294967296,null,2,32,[7,1245783967],[8,1640124884],[9,&quot;5.1.0&quot;],&quot;5.1.0&quot;,&quot;$chrome_asyncScriptInfo&quot;,&quot;__$webdriverAsyncExecutor&quot;]&#39;</span></span>
+<span class="line"><span style="color: #abb2bf"> 46 81 &#39;[9,15,3624428041,4294967296,null,2,32,[7,1245783967],[8,1640124884],[9,&quot;5.1.0&quot;],&quot;5.1.0&quot;,&quot;$chrome_asyncScriptInfo&quot;,&quot;__$webdriverAsyncExecutor&quot;]&#39;</span></span>
+<span class="line"><span style="color: #abb2bf">				9&amp; 15 = 9</span></span>
+<span class="line"><span style="color: #abb2bf"> 71 82 &#39;[9,15,3624428041,4294967296,null,2,32,[7,1245783967],[8,1640124884],[9,&quot;5.1.0&quot;],&quot;5.1.0&quot;,&quot;$chrome_asyncScriptInfo&quot;,&quot;__$webdriverAsyncExecutor&quot;]&#39;</span></span></code></pre></div></div></figure>
+
+<p>上面我已经附上了各种运算结果，最后要注意的是，如果你插桩+&#x3D;这个，他的结果每次都会在+5 就是最终的结过，得到这个思路后，把它复述给gpt,让他帮我们完成代码。</p>
+<figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">array</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF">  [</span><span style="color: #D19A66">3447926452</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">2069153462</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">3972284619</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">4133534163</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">3678609889</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">97836732</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">1914591165</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">4045946446</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">1756250425</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">147771365</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">3737565922</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">3624428041</span><span style="color: #ABB2BF">]</span></span>
+<span class="line"><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">FIXED</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">4294967296</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #C678DD">let</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">n</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">FIXED</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">15</span><span style="color: #ABB2BF">; </span><span style="color: #7F848E; font-style: italic">// 初始值为 0</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #C678DD">for</span><span style="color: #ABB2BF"> (</span><span style="color: #C678DD">let</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">; </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&lt;</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">array</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">length</span><span style="color: #ABB2BF">; </span><span style="color: #E06C75">i</span><span style="color: #56B6C2">++</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">current</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">array</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">15</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">n</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> (</span><span style="color: #E06C75">current</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">n</span><span style="color: #ABB2BF">) </span><span style="color: #56B6C2">&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">15</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">res</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">n</span><span style="color: #56B6C2">+</span><span style="color: #D19A66">5</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #E5C07B">console</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">log</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&quot;最终结果是:&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">res</span><span style="color: #ABB2BF">); </span><span style="color: #7F848E; font-style: italic">// 输出：13</span></span></code></pre></div></div></figure>
+
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745644275_680c6af308a5ac6dc1da0.png" alt="image-20250426131114180" data-caption="image-20250426131114180" loading="lazy">	</p>
+<p>也是和网页上对的上的</p>
+<p>继续查看，这次我们从这个生成的乱码字符串入手，会简单很多，直接搜索，然后定位最后一个，这里我们发现他多了个<code>K</code></p>
+<p>可能是拼接的salt，毕竟xb也有拼接，并不奇怪，这里我们搜索开头，把<code>K</code>也加进入进去，</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745644825_680c6d19a00483eccaa6c.png" alt="image-20250426132024557" data-caption="image-20250426132024557" loading="lazy"></p>
+<p>往上翻翻看到了一个substring函数的切割，还看到他把48位数组，就是我们<code>Uint8array</code>转的那些随机数，也进行了转字符串，</p>
+<p>也就是”K”+前91位切断+48数组转的字符串+后91位</p>
+<p>代码如下。</p>
+<figure class="shiki"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">array_test = [10,0,0,4,67,143,22,187,1,0,2,0,1,2,0,2,0,14,3,0,32,99,97,53,99,53,57,51,55,97,98,54,49,98,51,57,98,97,51,55,97,56,57,49,102,99,50,99,55,57,54,97,97,4,0,32,100,52,49,100,56,99,100,57,56,102,48,48,98,50,48,52,101,57,56,48,48,57,57,56,101,99,102,56,52,50,55,101,5,0,32,49,98,48,52,53,56,56,100,57,51,98,49,97,102,97,99,52,53,53,55,51,97,52,51,98,57,101,49,53,53,57,52,6,0,4,104,12,96,255,7,0,4,74,65,39,159,8,0,4,97,194,81,212,9,0,5,53,46,49,46,48]</span></span>
+<span class="line"><span style="color: #abb2bf">const array_test_two =[180,46,131,205,182,198,84,123,203,64,196,236,211,185,96,246,225,33,67,219,188,222,212,5,189,87,30,114,78,62,40,241,57,65,174,104,229,207,206,8,226,186,198,222,9,98,8,216]</span></span>
+<span class="line"><span style="color: #abb2bf"></span></span>
+<span class="line"><span style="color: #abb2bf">const grable_string = String.fromCharCode(...array_test);</span></span>
+<span class="line"><span style="color: #abb2bf">const grable_string_two = String.fromCharCode(...array_test_two);</span></span>
+<span class="line"><span style="color: #abb2bf">console.log(&quot;grable_string&quot;, grable_string.length)</span></span>
+<span class="line"><span style="color: #abb2bf">console.log(&quot;grable_string_two&quot;, grable_string_two.length)</span></span>
+<span class="line"><span style="color: #abb2bf">var e = [3447926452,2069153462,3972284619,4133534163,3678609889,97836732,1914591165,4045946446,1756250425,147771365,3737565922,3624428041]</span></span>
+<span class="line"><span style="color: #abb2bf"></span></span>
+<span class="line"><span style="color: #abb2bf">garbled_characters = Ab22(e, 14, grable_string);</span></span>
+<span class="line"><span style="color: #abb2bf">console.log(garbled_characters)</span></span>
+<span class="line"><span style="color: #abb2bf">console.log(&quot;111&quot;,garbled_characters.charCodeAt(0))</span></span>
+<span class="line"><span style="color: #abb2bf">sub1 = garbled_characters.substring(0, 110)  // substring 是动态</span></span>
+<span class="line"><span style="color: #abb2bf">sub2 = garbled_characters.substring(110)</span></span>
+<span class="line"><span style="color: #abb2bf">console.log(sub1)</span></span>
+<span class="line"><span style="color: #abb2bf"></span></span>
+<span class="line"><span style="color: #abb2bf">const final_str = &#39;K&#39; + sub1 + grable_string_two + sub2</span></span>
+<span class="line"><span style="color: #abb2bf">console.log(final_str)</span></span>
+<span class="line"><span style="color: #abb2bf">// ModiB64  魔改base64和xb一样，只是码表不同而已。</span></span>
+<span class="line"><span style="color: #abb2bf">const x_Gnarly = ModiB64(&quot;u09tbS3Uxxxxx(脱敏)k8JORCF5/xKHwacP=&quot;, final_str)</span></span>
+<span class="line"><span style="color: #abb2bf">console.log(x_Gnarly)</span></span></code></pre></div></div></figure>
+
+
+
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745645323_680c6f0b72f3015107df5.png" alt="image-20250426132842424" data-caption="image-20250426132842424" loading="lazy"></p>
+<p>发现结果是完全对的上的，只剩下substring的值 ，是怎么取得了。</p>
+<h3 id="substring取值"><a href="#substring取值" class="headerlink" title="substring取值"></a>substring取值</h3><p>这里纯看日志，插桩+&#x3D; 和 %&#x3D;就可以分析出来 </p>
+<p>在<code>(H = W[&quot;apply&quot;](V, Q),</code> 下个条件断点 <code>W.toString() == &#39;function substring() &#123; [native code] &#125;&#39;</code></p>
+<p>插桩就可以了</p>
+<p>截取部分日志</p>
+<figure class="shiki"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">数组一 = [102,126,80,64,182,9,42,92,254,191,247,183,160,220,98,203,210,35,70,109,222,49,40,131,199,209,86,193,8,149,142,203,226,179,177,113,167,115,41,237,177,184,53,124,112,13,216,87]</span></span>
+<span class="line"><span style="color: #abb2bf">数组二 = [148,63,67,189,6,17,96,154,48,195,123,175,103,47,188,168,187,192,207,60,61,254,143,103,48,95,64,160,120,59,115,205,225,61,2,255,194,46,253,224,177,157,162,130,129,20,13,125,47,137,51,173,247,243,70,5,239,66,29,246,93,219,218,97,1,124,54,244,130,134,255,23,227,165,57,16,188,192,205,40,224,98,138,147,251,50,189,220,10,93,74,41,99,160,36,22,23,171,160,252,63,156,154,105,5,43,191,108,46,205,24,62,202,244,38,161,11,73,7,0,118,252,204,190,177,169,195,165,37,204,67,74,121,172,154,118,32,247,121,136,223,79,242,214,41,179,158,253,129,96,25,82]</span></span>
+<span class="line"><span style="color: #abb2bf">现在根据我的下文的提示帮我编写js代码 </span></span>
+<span class="line"><span style="color: #abb2bf">//数组一 48位数组</span></span>
+<span class="line"><span style="color: #abb2bf"> v[l] 0 += n 102 0是固定值</span></span>
+<span class="line"><span style="color: #abb2bf"> v[l] 152 += n 1 153 固定153</span></span>
+<span class="line"><span style="color: #abb2bf"> v[l] 102 %= n 153 102 %153=  102 </span></span>
+<span class="line"><span style="color: #abb2bf"> </span></span>
+<span class="line"><span style="color: #abb2bf"> v[l] 102 += n 126  上个结果中的102 + 数组中的第二位 126 = 228</span></span>
+<span class="line"><span style="color: #abb2bf"> v[l] 152 += n 1 153 固定153</span></span>
+<span class="line"><span style="color: #abb2bf"> v[l] 228 %= n 153   228 % 153 = 75</span></span>
+<span class="line"><span style="color: #abb2bf"> </span></span>
+<span class="line"><span style="color: #abb2bf"> v[l] 75 += n 80</span></span>
+<span class="line"><span style="color: #abb2bf"> v[l] 152 += n 1</span></span>
+<span class="line"><span style="color: #abb2bf"> v[l] 155 %= n 153</span></span>
+<span class="line"><span style="color: #abb2bf"> </span></span>
+<span class="line"><span style="color: #abb2bf"> v[l] 2 += n 64</span></span>
+<span class="line"><span style="color: #abb2bf"> v[l] 152 += n 1</span></span>
+<span class="line"><span style="color: #abb2bf"> v[l] 66 %= n 153</span></span>
+<span class="line"><span style="color: #abb2bf"> </span></span>
+<span class="line"><span style="color: #abb2bf"> v[l] 66 += n 182</span></span>
+<span class="line"><span style="color: #abb2bf"> v[l] 152 += n 1</span></span>
+<span class="line"><span style="color: #abb2bf"> v[l] 248 %= n 153</span></span>
+<span class="line"><span style="color: #abb2bf"> </span></span>
+<span class="line"><span style="color: #abb2bf"> //然后数组二也是同理 数组二是152位数组</span></span></code></pre></div></div></figure>
+
+<p>同样，把需求整理给Gpt，让他给出代码。</p>
+<figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"></span>
+<span class="line"><span style="color: #E06C75">arrays</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> []</span></span>
+<span class="line"><span style="color: #C678DD">function</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">loopStringChars</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75; font-style: italic">str</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">for</span><span style="color: #ABB2BF"> (</span><span style="color: #C678DD">let</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">; </span><span style="color: #E06C75">i</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&lt;</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">str</span><span style="color: #ABB2BF">.</span><span style="color: #E06C75">length</span><span style="color: #ABB2BF">; </span><span style="color: #E06C75">i</span><span style="color: #56B6C2">++</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">char</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">str</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">charCodeAt</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">i</span><span style="color: #ABB2BF">); </span><span style="color: #7F848E; font-style: italic">// 或直接用 str[i]</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #7F848E; font-style: italic">//console.log(`位置 ${i} 的字符: ${char}`);</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #E5C07B">arrays</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">push</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">char</span><span style="color: #ABB2BF">)</span></span>
+<span class="line"><span style="color: #ABB2BF">    }</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">return</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">arrays</span></span>
+<span class="line"><span style="color: #ABB2BF">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #E06C75">array_test</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> [</span><span style="color: #D19A66">10</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">4</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">67</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">143</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">22</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">187</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">1</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">2</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">1</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">2</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">2</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">14</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">3</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">32</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">99</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">97</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">53</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">99</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">53</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">57</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">51</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">55</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">97</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">98</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">54</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">49</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">98</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">51</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">57</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">98</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">97</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">51</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">55</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">97</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">56</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">57</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">49</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">102</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">99</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">50</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">99</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">55</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">57</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">54</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">97</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">97</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">4</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">32</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">100</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">52</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">49</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">100</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">56</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">99</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">100</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">57</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">56</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">102</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">48</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">48</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">98</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">50</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">48</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">52</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">101</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">57</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">56</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">48</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">48</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">57</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">57</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">56</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">101</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">99</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">102</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">56</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">52</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">50</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">55</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">101</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">5</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">32</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">49</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">98</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">48</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">52</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">53</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">56</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">56</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">100</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">57</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">51</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">98</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">49</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">97</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">102</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">97</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">99</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">52</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">53</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">53</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">55</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">51</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">97</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">52</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">51</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">98</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">57</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">101</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">49</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">53</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">53</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">57</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">52</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">6</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">4</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">104</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">12</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">96</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">255</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">7</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">4</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">74</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">65</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">39</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">159</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">8</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">4</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">97</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">194</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">81</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">212</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">9</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">5</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">53</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">46</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">49</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">46</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">48</span><span style="color: #ABB2BF">]</span></span>
+<span class="line"><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">grable_string</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">String</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">fromCharCode</span><span style="color: #ABB2BF">(...</span><span style="color: #E06C75">array_test</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">e</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> [</span><span style="color: #D19A66">3447926452</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">2069153462</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">3972284619</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">4133534163</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">3678609889</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">97836732</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">1914591165</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">4045946446</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">1756250425</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">147771365</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">3737565922</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">3624428041</span><span style="color: #ABB2BF">]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #E06C75">garbled_characters</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">Ab22</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">e</span><span style="color: #ABB2BF">, </span><span style="color: #D19A66">14</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">grable_string</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #E5C07B">console</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">log</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">garbled_characters</span><span style="color: #ABB2BF">)</span></span>
+<span class="line"><span style="color: #E06C75">数组一</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">loopStringChars</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">garbled_characters</span><span style="color: #ABB2BF">)</span></span>
+<span class="line"><span style="color: #E5C07B">console</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">log</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">数组一</span><span style="color: #ABB2BF">)</span></span>
+<span class="line"><span style="color: #E06C75">数组二</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> [</span><span style="color: #D19A66">180</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">46</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">131</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">205</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">182</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">198</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">84</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">123</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">203</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">64</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">196</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">236</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">211</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">185</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">96</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">246</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">225</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">33</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">67</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">219</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">188</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">222</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">212</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">5</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">189</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">87</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">30</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">114</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">78</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">62</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">40</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">241</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">57</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">65</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">174</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">104</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">229</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">207</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">206</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">8</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">226</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">186</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">198</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">222</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">9</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">98</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">8</span><span style="color: #ABB2BF">,</span><span style="color: #D19A66">216</span><span style="color: #ABB2BF">]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #C678DD">let</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">v</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #7F848E; font-style: italic">// 处理数组一</span></span>
+<span class="line"><span style="color: #C678DD">for</span><span style="color: #ABB2BF"> (</span><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">num</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">of</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">数组一</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">v</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">num</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">v</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">%=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">153</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #7F848E; font-style: italic">// 处理数组二</span></span>
+<span class="line"><span style="color: #C678DD">for</span><span style="color: #ABB2BF"> (</span><span style="color: #C678DD">const</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">num</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">of</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">数组二</span><span style="color: #ABB2BF">) {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">v</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">num</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">v</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">%=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">153</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #E5C07B">console</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">log</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">v</span><span style="color: #ABB2BF">);</span></span></code></pre></div></div></figure>
+
+
+
+<h2 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h2><p>代码整合运行</p>
+<p>一级评论</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745646854_680c750667013f1873fbb.png" alt="image-20250426135411259" data-caption="image-20250426135411259" loading="lazy"></p>
+<p>二级评论</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250426/1745647804_680c78bc870a3c04f774d.png" alt="image-20250426140957944" data-caption="image-20250426140957944" loading="lazy"></p>
+<p>目前整个X-Gnarly就分析完毕了，整体逆向还是很艰辛，感谢有福生大佬，对我进行教学指导，不然靠自己还是过于吃力。</p>
+
+    
+  </article>
+
+  
+      
+    <div class="nexmoe-post-copyright">
+        <strong>本文作者：</strong>skuukzky<br>
+        <strong>本文链接：</strong><a href="https://lpy30m.github.io/skuukzky.github.io/2025/04/26/%E9%80%86%E5%90%91/Tiktok-X-Gnarly-jsvmp%E7%AE%97%E6%B3%95%E8%BF%98%E5%8E%9F/" title="https:&#x2F;&#x2F;lpy30m.github.io&#x2F;skuukzky.github.io&#x2F;2025&#x2F;04&#x2F;26&#x2F;%E9%80%86%E5%90%91&#x2F;Tiktok-X-Gnarly-jsvmp%E7%AE%97%E6%B3%95%E8%BF%98%E5%8E%9F&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;lpy30m.github.io&#x2F;skuukzky.github.io&#x2F;2025&#x2F;04&#x2F;26&#x2F;%E9%80%86%E5%90%91&#x2F;Tiktok-X-Gnarly-jsvmp%E7%AE%97%E6%B3%95%E8%BF%98%E5%8E%9F&#x2F;</a><br>
+        
+            <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+
+        
+    </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+</div>
+  
+  
+    <script async src="/skuukzky.github.io/js/copy-codeblock.js?v=1745648378392"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          <script src="https://giscus.app/client.js"
+    data-repo="lpy30m/skuukzky.github.io"
+    data-repo-id="R_kgDOMnIPZw"
+    data-category="General"
+    data-category-id="DIC_kwDOMnIPZ84Ch3f5"
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async>
+</script>
+
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Tiktok-X-Gnarly-jsvmp%E7%AE%97%E6%B3%95%E8%BF%98%E5%8E%9F"><span class="toc-number">1.</span> <span class="toc-text">Tiktok X-Gnarly jsvmp算法还原</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%BC%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text">导言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-number">1.2.</span> <span class="toc-text">分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%92%E6%A1%A9"><span class="toc-number">1.3.</span> <span class="toc-text">插桩</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%98%E5%8E%9F"><span class="toc-number">1.4.</span> <span class="toc-text">还原</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Ab22"><span class="toc-number">1.4.1.</span> <span class="toc-text">Ab22</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#substring%E5%8F%96%E5%80%BC"><span class="toc-number">1.4.2.</span> <span class="toc-text">substring取值</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E5%B0%BE"><span class="toc-number">1.5.</span> <span class="toc-text">结尾</span></a></li></ol></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2058306854838448" crossorigin="anonymous"></script>
+</div><!-- hexo injector body_end start -->
+  <script>
+  const CODE_CONFIG = {
+    beautify: false,
+    highlightCopy: true,
+    highlightLang: false,
+    highlightHeightLimit: 360,
+    isHighlightShrink: false,
+    copy: {
+      success: 'Copy Success',
+      error: 'Copy Error',
+      noSupport: 'Browser Not Support',
+    }
+  };
+  console.log(
+    `%c hexo-shiki-plugin %c v1.0.27 %c https://github.com/nova1751/hexo-shiki-plugin`,
+    "color: #fff; background: #5f5f5f",
+    "color: #fff; background: #80c8f8",
+    ""
+  );
+  </script>
+  <!-- hexo injector body_end end --></body></html>
