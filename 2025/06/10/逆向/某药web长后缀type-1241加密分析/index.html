@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>某药web长后缀type__1241加密分析 - skuukzky</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<meta name="description" content="某药web长后缀type__1241加密分析前言此次是被分派到公司的一个需求,要求获取一些数据,具体什么不多说了，整体网站没有加密，只有params处，有一个非常长的type__1241开头的后缀，如果我们不带这个，或者伪造，网站会返回一个html包含一大串的js代码。此次目的就是分析长后缀是怎么来的了，至于为什么说是长后缀，因为ali还有个很短的，不过听说是旧版本了。 分析由于是公司需求，另加药">
+<meta property="og:type" content="article">
+<meta property="og:title" content="某药web长后缀type__1241加密分析">
+<meta property="og:url" content="https://lpy30m.github.io/skuukzky.github.io/2025/06/10/%E9%80%86%E5%90%91/%E6%9F%90%E8%8D%AFweb%E9%95%BF%E5%90%8E%E7%BC%80type-1241%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="skuukzky">
+<meta property="og:description" content="某药web长后缀type__1241加密分析前言此次是被分派到公司的一个需求,要求获取一些数据,具体什么不多说了，整体网站没有加密，只有params处，有一个非常长的type__1241开头的后缀，如果我们不带这个，或者伪造，网站会返回一个html包含一大串的js代码。此次目的就是分析长后缀是怎么来的了，至于为什么说是长后缀，因为ali还有个很短的，不过听说是旧版本了。 分析由于是公司需求，另加药">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749539792_6847dbd00ebe20038c582.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749540165_6847dd4524569e68c44fe.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749540080_6847dcf01d4697c736811.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749541012_6847e0947d06aa3f40a53.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749541118_6847e0fe163945f1a579e.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749541203_6847e1532fcefe5860cf4.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749541611_6847e2ebd939b1e5636d5.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749541799_6847e3a7ad38c805b2ab2.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749542373_6847e5e5b6ccc17b79469.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749542528_6847e6808881227b6325c.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749543449_6847ea1946c0288d25c1f.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749543920_6847ebf04d70ee0705b4b.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749544101_6847eca547445eaa2f7fa.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749544307_6847ed73dc9933e810d58.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749544400_6847edd06d555063c1041.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749544622_6847eeaeb5282dd535f2c.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749545559_6847f2574c6a7a8ea0549.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749544801_6847ef61a13f7b8a2ed83.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749545133_6847f0ad26efb73ad2947.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749545266_6847f132a330456daaefd.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749545388_6847f1acb88eb9a39945b.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749545829_6847f36580809a07c21fb.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749545939_6847f3d343276037d736f.png">
+<meta property="og:image" content="https://image.3001.net/images/20250610/1749548576_6847fe206d901005b5aa9.png">
+<meta property="article:published_time" content="2025-06-10T09:12:55.000Z">
+<meta property="article:modified_time" content="2025-06-10T09:51:24.182Z">
+<meta property="article:author" content="skuukzky">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://image.3001.net/images/20250610/1749539792_6847dbd00ebe20038c582.png">
+
+<link rel="stylesheet" href="/skuukzky.github.io/lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="/skuukzky.github.io/lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="/skuukzky.github.io/lib/iconfont/iconfont.css?v=1749549090811">
+
+<link rel="stylesheet" href="/skuukzky.github.io/css/style.css?v=1749549090811">
+
+
+
+
+    
+        <link rel="stylesheet" href="/skuukzky.github.io/custom.css?v=1749549090811">
+    
+
+
+
+<script src="/skuukzky.github.io/lib/mdui_043tiny/mdui.js" async></script>
+<script src="/skuukzky.github.io/lib/fancybox/fancybox.umd.js" async></script>
+<script src="/skuukzky.github.io/lib/lax.min.js" async></script>
+
+
+<script async src="/skuukzky.github.io/js/app.js?v=1749549090811"></script>
+
+ 
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4D4ZJ9G024"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag("js", new Date());
+
+  gtag("config", "G-4D4ZJ9G024");
+</script>
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-shiki-plugin@latest/lib/codeblock.css">
+<style>:root{--hl-color:#abb2bf;--hl-bg:#282c34;--hltools-bg:#21252b;--hltools-color:#bbbbbc;--hlnumber-bg:#282c34;--hlnumber-color:#495162;--hlscrollbar-bg:#373c47;--hlexpand-bg:linear-gradient(180deg,rgba(40,44,52,0.1),rgba(40,44,52,0.9))}</style>
+    <style>
+    .code-expand-btn:not(.expand-done) ~ div.codeblock,
+    .code-expand-btn:not(.expand-done) ~ * div.codeblock {
+      overflow: hidden;
+      height: 360px;
+    }
+    </style>
+  <!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(https://image.3001.net/images/20250307/1741314829_67ca5b0d4957ea5241ba3.png)"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="/skuukzky.github.io/" title="skuukzky"><img src="https://image.3001.net/images/20250307/1741314773_67ca5ad59320935fabc37.png" alt="skuukzky"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/skuukzky.github.io/" title="skuukzky">
+            <img src="https://image.3001.net/images/20250307/1741314773_67ca5ad59320935fabc37.png" alt="skuukzky" alt="skuukzky">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>文章</span>14</div>
+        <div><span>标签</span>0</div>
+        <div><span>分类</span>2</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/" title="回到首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                回到首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/archive.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/PY.html" title="我的朋友">
+            <i class="mdui-list-item-icon nexmoefont icon-unorderedlist"></i>
+            <div class="mdui-list-item-content">
+                我的朋友
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/donate.html" title="给我赞助">
+            <i class="mdui-list-item-icon nexmoefont icon-coffee"></i>
+            <div class="mdui-list-item-content">
+                给我赞助
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/about.html" title="关于博主">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于博主
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+         
+            <form id="search_form" action_e="https://cn.bing.com/search?q=site:nexmoe.com" onsubmit="return search();">
+                <label><input id="search_value" name="q" type="search" placeholder="搜索"></label>
+            </form>
+         
+    </div>
+</div>
+
+
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="https://space.bilibili.com/603975910"
+			target="_blank"
+			mdui-tooltip="{content: '哔哩哔哩'}"
+			style="
+				color: rgb(231, 106, 141);
+				background-color: rgba(231, 106, 141, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/lpy30m/"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://nexmoe.com/atom.xml"
+			target="_blank"
+			mdui-tooltip="{content: 'RSS'}"
+			style="
+				color: rgb(247, 132, 34);
+				background-color: rgba(247, 132, 34, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-rss"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章分类</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/skuukzky.github.io/categories/逆向/">逆向</a>
+          <span class="category-list-count">9</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/skuukzky.github.io/categories/验证码识别/">验证码识别</a>
+          <span class="category-list-count">4</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+    
+        
+        
+    
+        
+        
+        
+        
+   
+    <div class="nexmoe-copyright">
+        &copy; 2025 skuukzky
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        <br><a target="_blank" href="https://beian.miit.gov.cn/"></a>
+
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover absolute" style="padding-top: 37.5%;"> 
+            <img src="https://image.3001.net/images/20250610/1749549072_68480010c706e77bfa1f6.png" alt="某药web长后缀type__1241加密分析" loading="lazy">
+            <h1>某药web长后缀type__1241加密分析</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2025年06月10日</a>
+        
+            <a class="nexmoefont icon-appstore-fill -link" href="/skuukzky.github.io/categories/%E9%80%86%E5%90%91/">逆向</a>
+        
+        
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <h1 id="某药web长后缀type-1241加密分析"><a href="#某药web长后缀type-1241加密分析" class="headerlink" title="某药web长后缀type__1241加密分析"></a>某药web长后缀type__1241加密分析</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>此次是被分派到公司的一个需求,要求获取一些数据,具体什么不多说了，整体网站没有加密，只有params处，有一个非常长的type__1241开头的后缀，如果我们不带这个，或者伪造，网站会返回一个html包含一大串的js代码。此次目的就是分析长后缀是怎么来的了，至于为什么说是长后缀，因为ali还有个很短的，不过听说是旧版本了。</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>由于是公司需求，另加药物类,网址就不放了，阿里系后缀网站有很多，某雪球就是同样套路结果。有心有缘分总能找到一两个网站。</p>
+<h3 id="无限debugger"><a href="#无限debugger" class="headerlink" title="无限debugger"></a>无限debugger</h3><p>这里我们打开控制台，进行翻页操作，触发请求,映入眼帘的是一个无限debugger，这个debugger真的非常有意思和新颖啊,不仅用了正则表达式检测是否格式化，还new 了<code>SVGAnimateString</code> 进行类型检测，所以当我们打开控制台，追两下就能看到<code>TypeError </code></p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749539792_6847dbd00ebe20038c582.png" alt="image-20250610151631392" data-caption="image-20250610151631392" loading="lazy"></p>
+<p>我们利用ai来解释一下这些代码吧，毕竟又好用的工具，何必自己苦苦分析</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749540165_6847dd4524569e68c44fe.png" alt="image-20250610151957817" data-caption="image-20250610151957817" loading="lazy"></p>
+<p>对于这个无限debugger的bypass呢，大家就各显神通吧，暂不提供代码了，在此给出一下思路,</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749540080_6847dcf01d4697c736811.png" alt="image-20250610152118861" data-caption="image-20250610152118861" loading="lazy"></p>
+<h3 id="生成定位"><a href="#生成定位" class="headerlink" title="生成定位"></a>生成定位</h3><p>我们通过启动器进入 send函数</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749541012_6847e0947d06aa3f40a53.png" alt="image-20250610153651933" data-caption="image-20250610153651933" loading="lazy"></p>
+<p>我们看到send函数中也包含几个函数，这里我们在if和else处下断，看看走哪些内容</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749541118_6847e0fe163945f1a579e.png" alt="image-20250610153837520" data-caption="image-20250610153837520" loading="lazy"></p>
+<p>然后进行翻页操作</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749541203_6847e1532fcefe5860cf4.png" alt="image-20250610154002656" data-caption="image-20250610154002656" loading="lazy"></p>
+<p>发现停在了这个断点处，且this指向XHR,这里我们不妨猜测，代码里重写了XHR内容，后续可能进行了加密处理。我们继续单步运行</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749541611_6847e2ebd939b1e5636d5.png" alt="image-20250610154651324" data-caption="image-20250610154651324" loading="lazy"></p>
+<p>发现进入了一个新的函数，且js也由jquery变为VM虚拟机，这里同样，在if和else处打上断点。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749541799_6847e3a7ad38c805b2ab2.png" alt="image-20250610154958885" data-caption="image-20250610154958885" loading="lazy"></p>
+<p>这里发现了最终的type__1241参数是在这里生成，不过函数经过变种ob混淆,只能先提取出来，然后依次运行输出，最终得到，是经过g函数后，得到了最终的加密结果。</p>
+<h3 id="AST处理"><a href="#AST处理" class="headerlink" title="AST处理"></a>AST处理</h3><h3 id="Switch-分析"><a href="#Switch-分析" class="headerlink" title="Switch 分析"></a>Switch 分析</h3><p>经过ast处理后的js已经很的非常直观了，逻辑也清晰可见，不过可惜的是，无法有更好的方法替换在浏览器中，所以采用静态分析AST后的代码，浏览器继续动态调试混淆后的。</p>
+<p>g函数中传递的参数则是三个，分别是<br><code>//www.xxxxx.com/pc/search/v2/listProducts</code>	url路径</p>
+<p><code>queryWord=%E7%BE%8E%E6%9E%97&amp;categoryFirstId....</code> data参数</p>
+<p><code>post</code> 请求方法</p>
+<p><code>1</code></p>
+<p>这里在switch中所有case分支下的continue下断点.</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749542373_6847e5e5b6ccc17b79469.png" alt="image-20250610155932963" data-caption="image-20250610155932963" loading="lazy"></p>
+<p>继续分析，由于case的分支不多，这里我们一个个看就足够了。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749542528_6847e6808881227b6325c.png" alt="image-20250610160207721" data-caption="image-20250610160207721" loading="lazy"></p>
+<p>看到了一个数组，且数组的第一位也正好对应我们的case走的第一个分支，所以这个数组应该是执行顺序无疑了。</p>
+<h4 id="case-6"><a href="#case-6" class="headerlink" title="case 6"></a>case 6</h4><p><code>var OR = y[&#39;X&#39;];</code> </p>
+<p>发现只是设置了window的操作，可以跳过</p>
+<h4 id="case-7"><a href="#case-7" class="headerlink" title="case 7"></a>case 7</h4><p>有部分混淆,我们就对照着我们的解完混淆后的代码看，发现是进行转小写操作，传参则是我们的请求方法(GET或者POST)</p>
+<h4 id="case-8"><a href="#case-8" class="headerlink" title="case 8"></a>case 8</h4><figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">case</span><span style="color: #ABB2BF"> </span><span style="color: #98C379">&#39;8&#39;</span><span style="color: #ABB2BF">:</span></span>
+<span class="line"><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">Ok</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">z</span><span style="color: #ABB2BF">(</span><span style="color: #61AFEF">t</span><span style="color: #ABB2BF">(</span><span style="color: #E5C07B">O3</span><span style="color: #ABB2BF">)),</span></span>
+<span class="line"><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">OP</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">e</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">Ok</span><span style="color: #ABB2BF">, </span><span style="color: #56B6C2">!</span><span style="color: #ABB2BF">(</span><span style="color: #56B6C2">-</span><span style="color: #D19A66">815</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">kS</span><span style="color: #ABB2BF">), </span><span style="color: #56B6C2">!</span><span style="color: #ABB2BF">(</span><span style="color: #56B6C2">-</span><span style="color: #D19A66">815</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">kS</span><span style="color: #ABB2BF">)),</span></span>
+<span class="line"><span style="color: #E06C75">Oh</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">OP</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">Oy</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">Oh</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">y</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&#39;X&#39;</span><span style="color: #ABB2BF">][</span><span style="color: #98C379">&quot;encodeURIComponent&quot;</span><span style="color: #ABB2BF">](</span><span style="color: #E5C07B">OR</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&quot;_waf_bd8ce2ce37&quot;</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">O5</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #98C379">&quot;110279f682e&quot;</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">Oh</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #C678DD">continue</span><span style="color: #ABB2BF">;</span></span></code></pre></div></div></figure>
+
+<p>这里发现做的内容操作很简单，只是进行<code>encodeURIComponent</code>函数操作，其中<code>_waf_bd8ce2ce37</code>是携带错误的type值，会返回一串js代码，其中返回的结果,而O5<code>post</code>  Oh是urlpath ,都是传递来的参数，最后进行url编码即可.</p>
+<h4 id="case-1"><a href="#case-1" class="headerlink" title="case 1"></a>case 1</h4><figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">case</span><span style="color: #ABB2BF"> </span><span style="color: #98C379">&#39;1&#39;</span><span style="color: #ABB2BF">:</span></span>
+<span class="line"><span style="color: #C678DD">if</span><span style="color: #ABB2BF"> (</span><span style="color: #E5C07B">O4</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&amp;&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">-</span><span style="color: #D19A66">1</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">==</span><span style="color: #ABB2BF"> [</span><span style="color: #98C379">&quot;get&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;head&quot;</span><span style="color: #ABB2BF">][</span><span style="color: #98C379">&quot;indexOf&quot;</span><span style="color: #ABB2BF">](</span><span style="color: #E5C07B">O5</span><span style="color: #ABB2BF">)) {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">if</span><span style="color: #ABB2BF"> (</span><span style="color: #E06C75">y</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&#39;X&#39;</span><span style="color: #ABB2BF">][</span><span style="color: #98C379">&quot;Uint8Array&quot;</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">&amp;&amp;</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">O4</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">instanceof</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">y</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&#39;X&#39;</span><span style="color: #ABB2BF">][</span><span style="color: #98C379">&quot;Uint8Array&quot;</span><span style="color: #ABB2BF">]) {</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #C678DD">for</span><span style="color: #ABB2BF"> (</span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">O9</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #98C379">&#39;&#39;</span><span style="color: #ABB2BF">, </span><span style="color: #E5C07B">OO</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">-</span><span style="color: #D19A66">815</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">kS</span><span style="color: #ABB2BF">; </span><span style="color: #E5C07B">OO</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&lt;</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">O4</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&quot;byteLength&quot;</span><span style="color: #ABB2BF">]; </span><span style="color: #E5C07B">OO</span><span style="color: #56B6C2">++</span><span style="color: #ABB2BF">)</span></span>
+<span class="line"><span style="color: #ABB2BF">            </span><span style="color: #E5C07B">O9</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">v</span><span style="color: #ABB2BF">[</span><span style="color: #E5C07B">O4</span><span style="color: #ABB2BF">[</span><span style="color: #E5C07B">OO</span><span style="color: #ABB2BF">]];</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #E06C75">Oh</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">O9</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">    } </span><span style="color: #C678DD">else</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #E06C75">h</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">y</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&#39;X&#39;</span><span style="color: #ABB2BF">][</span><span style="color: #98C379">&quot;encodeURIComponent&quot;</span><span style="color: #ABB2BF">](</span><span style="color: #E5C07B">O4</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #ABB2BF">}</span></span>
+<span class="line"><span style="color: #C678DD">continue</span><span style="color: #ABB2BF">;</span></span></code></pre></div></div></figure>
+
+<p>这里的if判断是fasle 所以不会走，所以会经过else的内容，即对上文的内容，在进行一次url编码。</p>
+<p>附上ai对于上述代码的解释</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749543449_6847ea1946c0288d25c1f.png" alt="image-20250610161728736" data-caption="image-20250610161728736" loading="lazy"></p>
+<h4 id="case-0"><a href="#case-0" class="headerlink" title="case 0"></a>case 0</h4><figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">case</span><span style="color: #ABB2BF"> </span><span style="color: #98C379">&#39;0&#39;</span><span style="color: #ABB2BF">:</span></span>
+<span class="line"><span style="color: #E06C75">y</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&#39;X&#39;</span><span style="color: #ABB2BF">][</span><span style="color: #98C379">&quot;Math&quot;</span><span style="color: #ABB2BF">][</span><span style="color: #98C379">&quot;random&quot;</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">T</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">a</span><span style="color: #ABB2BF">);</span></span>
+<span class="line"><span style="color: #C678DD">continue</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #7F848E; font-style: italic">// a 固定参数</span></span></code></pre></div></div></figure>
+
+<p>这个是重之之重了，由于当时没在意，错踩坑，卡了一会时间，最后才发现，实际上是伪随机数。</p>
+<p>这里分析一下T函数,至于a我还真找不到是怎么生成的，但所幸多次测试发现是固定的,不然还要卡很久。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749543920_6847ebf04d70ee0705b4b.png" alt="image-20250610162519785" data-caption="image-20250610162519785" loading="lazy"></p>
+<p>有了AST后的代码。整体直接扣下来运行即可。</p>
+<h4 id="case-4"><a href="#case-4" class="headerlink" title="case 4"></a>case 4</h4><figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">case</span><span style="color: #ABB2BF"> </span><span style="color: #98C379">&#39;4&#39;</span><span style="color: #ABB2BF">:</span></span>
+<span class="line"><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">Os</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">F</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">Oh</span><span style="color: #ABB2BF">),</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E5C07B">OX</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">Os</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #C678DD">continue</span><span style="color: #ABB2BF">;</span></span></code></pre></div></div></figure>
+
+<p>这里同样用ai去解释，省时省力，方便分析</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749544101_6847eca547445eaa2f7fa.png" alt="image-20250610162820506" data-caption="image-20250610162820506" loading="lazy"></p>
+<p>根据ai分析的，即可就分析出来算法，调用验证即可。</p>
+<figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">function</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">F</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75; font-style: italic">O3</span><span style="color: #ABB2BF">){</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">for</span><span style="color: #ABB2BF"> (</span><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">O4</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">CryptoJS</span><span style="color: #ABB2BF">.</span><span style="color: #61AFEF">SHA256</span><span style="color: #ABB2BF">(</span><span style="color: #E5C07B">O3</span><span style="color: #ABB2BF">).</span><span style="color: #61AFEF">toString</span><span style="color: #ABB2BF">(), </span><span style="color: #E5C07B">O5</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> [], </span><span style="color: #E5C07B">O6</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">8</span><span style="color: #ABB2BF">; </span><span style="color: #E5C07B">O6</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&lt;</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">24</span><span style="color: #ABB2BF">; </span><span style="color: #56B6C2">++</span><span style="color: #E5C07B">O6</span><span style="color: #ABB2BF">)</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #E5C07B">O5</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&quot;push&quot;</span><span style="color: #ABB2BF">](</span><span style="color: #E5C07B">O4</span><span style="color: #ABB2BF">[</span><span style="color: #E5C07B">O6</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">%</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">O4</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&quot;length&quot;</span><span style="color: #ABB2BF">]]);</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">return</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">O5</span><span style="color: #ABB2BF">;</span></span>
+<span class="line"><span style="color: #ABB2BF">}</span></span></code></pre></div></div></figure>
+
+<p>发现完美成功</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749544307_6847ed73dc9933e810d58.png" alt="image-20250610163147204" data-caption="image-20250610163147204" loading="lazy"></p>
+<h4 id="case-3"><a href="#case-3" class="headerlink" title="case 3"></a>case 3</h4><figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">case</span><span style="color: #ABB2BF"> </span><span style="color: #98C379">&#39;3&#39;</span><span style="color: #ABB2BF">:</span></span>
+<span class="line"><span style="color: #E06C75">Oh</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">!=</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">Oy</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">&amp;&amp;</span><span style="color: #ABB2BF"> (</span><span style="color: #E5C07B">OX</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">F</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">Oy</span><span style="color: #ABB2BF">));</span></span>
+<span class="line"><span style="color: #C678DD">continue</span><span style="color: #ABB2BF">;</span></span></code></pre></div></div></figure>
+
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749544400_6847edd06d555063c1041.png" alt="image-20250610163319810" data-caption="image-20250610163319810" loading="lazy">发现算法完全和case4一样，所以相同办法处理，只是传递的参数不同，不携带了data请求的内容了。</p>
+<h4 id="case-2"><a href="#case-2" class="headerlink" title="case 2"></a>case 2</h4><figure class="shiki javascript"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">case</span><span style="color: #ABB2BF"> </span><span style="color: #98C379">&#39;2&#39;</span><span style="color: #ABB2BF">:</span></span>
+<span class="line"><span style="color: #C678DD">var</span><span style="color: #ABB2BF"> </span><span style="color: #E5C07B">ON</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #98C379">&quot;110279f682e-&quot;</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">W</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">Os</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> [</span><span style="color: #61AFEF">G</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">Os</span><span style="color: #ABB2BF">), </span><span style="color: #61AFEF">G</span><span style="color: #ABB2BF">(</span><span style="color: #E5C07B">OX</span><span style="color: #ABB2BF">), </span><span style="color: #61AFEF">Z</span><span style="color: #ABB2BF">(), </span><span style="color: #C678DD">new</span><span style="color: #ABB2BF"> </span><span style="color: #E06C75">y</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&#39;X&#39;</span><span style="color: #ABB2BF">][</span><span style="color: #98C379">&quot;Date&quot;</span><span style="color: #ABB2BF">]()[</span><span style="color: #98C379">&quot;getTime&quot;</span><span style="color: #ABB2BF">]() </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #98C379">&#39;&#39;</span><span style="color: #ABB2BF">, </span><span style="color: #E5C07B">OR</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&quot;_waf_bd8ce2ce37&quot;</span><span style="color: #ABB2BF">], </span><span style="color: #E5C07B">OR</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&quot;_waf_a86dfdc5f2&quot;</span><span style="color: #ABB2BF">], </span><span style="color: #61AFEF">C</span><span style="color: #ABB2BF">()][</span><span style="color: #98C379">&quot;join&quot;</span><span style="color: #ABB2BF">](</span><span style="color: #98C379">&#39;|&#39;</span><span style="color: #ABB2BF">)),</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E5C07B">OE</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> {};</span></span>
+<span class="line"><span style="color: #C678DD">continue</span><span style="color: #ABB2BF">;</span></span></code></pre></div></div></figure>
+
+<p>应该就是最终生成地方了，看到了最先拼接的<code>110279f682e-</code>内容,W函数应该就是最终生成地方，这里依次分析</p>
+<h5 id="G函数"><a href="#G函数" class="headerlink" title="G函数"></a>G函数</h5><p>同样附上解释，这里知道大概即可，我们最终还是要把代码给扣出来使用。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749544622_6847eeaeb5282dd535f2c.png" alt="image-20250610163702131" data-caption="image-20250610163702131" loading="lazy"></p>
+<p>然后扣出来的结果和浏览器验证即可一下，防止出错。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749545559_6847f2574c6a7a8ea0549.png" alt="image-20250610165238715" data-caption="image-20250610165238715" loading="lazy"></p>
+<h5 id="Z函数"><a href="#Z函数" class="headerlink" title="Z函数"></a>Z函数</h5><p>只能说ai给出了大概的内容，实际上Z函数的作用，是获取浏览器的环境和指纹，最终通过算法动态生成位掩码</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749544801_6847ef61a13f7b8a2ed83.png" alt="image-20250610164000925" data-caption="image-20250610164000925" loading="lazy"></p>
+<p>这里一样扣出来即可。</p>
+<h5 id="C函数"><a href="#C函数" class="headerlink" title="C函数"></a>C函数</h5><p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749545133_6847f0ad26efb73ad2947.png" alt="image-20250610164532479" data-caption="image-20250610164532479" loading="lazy"></p>
+<p>可自己生成或者使用浏览器的结果，都不影响。</p>
+<h5 id="W函数"><a href="#W函数" class="headerlink" title="W函数"></a>W函数</h5><p>也是重之之中了</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749545266_6847f132a330456daaefd.png" alt="image-20250610164746057" data-caption="image-20250610164746057" loading="lazy"></p>
+<p>得知是个LZW压缩算法的变种，也是一样扣出来调用即可。这里我们查看最终拼接进入W函数的参数是什么，</p>
+<p>G函数得到的两个结果 拼接Z函数，加上时间戳 加上 js第一次乱码返回的<code>_waf_bd8ce2ce37</code>+<code>_waf_a86dfdc5f2（也是时间戳）</code>拼接C函数结果。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749545388_6847f1acb88eb9a39945b.png" alt="image-20250610164948342" data-caption="image-20250610164948342" loading="lazy"></p>
+<p>最终我们把传递参数传递给我们扣出来的W验证结果即可。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749545829_6847f36580809a07c21fb.png" alt="image-20250610165708757" data-caption="image-20250610165708757" loading="lazy"></p>
+<p>至此就完结撒花了。</p>
+<p>其实还剩一个case5分支,但是经过代码解释，发现只是更改了浏览器的location的属性，对于我们扣算法来说，用不上，也就不分析，不过还是附上一下ai的解释的图</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749545939_6847f3d343276037d736f.png" alt="image-20250610165858769" data-caption="image-20250610165858769" loading="lazy"></p>
+<h2 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h2><p>验证结果</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20250610/1749548576_6847fe206d901005b5aa9.png" alt="image-20250610172019787" data-caption="image-20250610172019787" loading="lazy"></p>
+<p>文章仅此学习记录。</p>
+<p>参考文章 </p>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/T3884TFd5HQxp7vfAFx-fA">某雪球最新长md5__1038记录</a></p>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=Mzk0NzI4MDc5Mw==&mid=2247486408&idx=1&sn=df3974b85e49ce04f5becf1caf764ccd&scene=21#wechat_redirect"> 解决某x球阿里系反爬</a></p>
+<p>感谢恩师七神，一手AST直接带我秒杀，经过此次需求和猿人学验证码比赛案例，会AST也显得额外重要了。</p>
+
+    
+  </article>
+
+  
+      
+    <div class="nexmoe-post-copyright">
+        <strong>本文作者：</strong>skuukzky<br>
+        <strong>本文链接：</strong><a href="https://lpy30m.github.io/skuukzky.github.io/2025/06/10/%E9%80%86%E5%90%91/%E6%9F%90%E8%8D%AFweb%E9%95%BF%E5%90%8E%E7%BC%80type-1241%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/" title="https:&#x2F;&#x2F;lpy30m.github.io&#x2F;skuukzky.github.io&#x2F;2025&#x2F;06&#x2F;10&#x2F;%E9%80%86%E5%90%91&#x2F;%E6%9F%90%E8%8D%AFweb%E9%95%BF%E5%90%8E%E7%BC%80type-1241%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;lpy30m.github.io&#x2F;skuukzky.github.io&#x2F;2025&#x2F;06&#x2F;10&#x2F;%E9%80%86%E5%90%91&#x2F;%E6%9F%90%E8%8D%AFweb%E9%95%BF%E5%90%8E%E7%BC%80type-1241%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90&#x2F;</a><br>
+        
+            <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+
+        
+    </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+</div>
+  
+  
+    <script async src="/skuukzky.github.io/js/copy-codeblock.js?v=1749549090788"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          <script src="https://giscus.app/client.js"
+    data-repo="lpy30m/skuukzky.github.io"
+    data-repo-id="R_kgDOMnIPZw"
+    data-category="General"
+    data-category-id="DIC_kwDOMnIPZ84Ch3f5"
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async>
+</script>
+
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9F%90%E8%8D%AFweb%E9%95%BF%E5%90%8E%E7%BC%80type-1241%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">某药web长后缀type__1241加密分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-number">1.2.</span> <span class="toc-text">分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A0%E9%99%90debugger"><span class="toc-number">1.2.1.</span> <span class="toc-text">无限debugger</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E5%AE%9A%E4%BD%8D"><span class="toc-number">1.2.2.</span> <span class="toc-text">生成定位</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AST%E5%A4%84%E7%90%86"><span class="toc-number">1.2.3.</span> <span class="toc-text">AST处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Switch-%E5%88%86%E6%9E%90"><span class="toc-number">1.2.4.</span> <span class="toc-text">Switch 分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#case-6"><span class="toc-number">1.2.4.1.</span> <span class="toc-text">case 6</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#case-7"><span class="toc-number">1.2.4.2.</span> <span class="toc-text">case 7</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#case-8"><span class="toc-number">1.2.4.3.</span> <span class="toc-text">case 8</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#case-1"><span class="toc-number">1.2.4.4.</span> <span class="toc-text">case 1</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#case-0"><span class="toc-number">1.2.4.5.</span> <span class="toc-text">case 0</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#case-4"><span class="toc-number">1.2.4.6.</span> <span class="toc-text">case 4</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#case-3"><span class="toc-number">1.2.4.7.</span> <span class="toc-text">case 3</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#case-2"><span class="toc-number">1.2.4.8.</span> <span class="toc-text">case 2</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#G%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.4.8.1.</span> <span class="toc-text">G函数</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Z%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.4.8.2.</span> <span class="toc-text">Z函数</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#C%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.4.8.3.</span> <span class="toc-text">C函数</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#W%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.4.8.4.</span> <span class="toc-text">W函数</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E5%B0%BE"><span class="toc-number">1.3.</span> <span class="toc-text">结尾</span></a></li></ol></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2058306854838448" crossorigin="anonymous"></script>
+</div><!-- hexo injector body_end start -->
+  <script>
+  const CODE_CONFIG = {
+    beautify: false,
+    highlightCopy: true,
+    highlightLang: false,
+    highlightHeightLimit: 360,
+    isHighlightShrink: false,
+    copy: {
+      success: 'Copy Success',
+      error: 'Copy Error',
+      noSupport: 'Browser Not Support',
+    }
+  };
+  console.log(
+    `%c hexo-shiki-plugin %c v1.0.27 %c https://github.com/nova1751/hexo-shiki-plugin`,
+    "color: #fff; background: #5f5f5f",
+    "color: #fff; background: #80c8f8",
+    ""
+  );
+  </script>
+  <!-- hexo injector body_end end --></body></html>
