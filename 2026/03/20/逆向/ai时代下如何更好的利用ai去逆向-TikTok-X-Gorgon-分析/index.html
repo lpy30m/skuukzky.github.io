@@ -1,36 +1,38 @@
 <!doctype html>
 <html lang="zh"><head>
-<title>ai时代下如何更好的利用ai去逆向(TikTok X-Gorgon 分析) - skuukzky</title>
+<title>skuukzky</title>
 <meta charset="UTF-8">
 <meta name="keywords" content="">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
 
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-<meta name="description" content="和 AI 一起做 Trace 逆向：从 8404a0480000 到魔改 RC4，再到最终值 ee5058db...引子很多时候，逆向真正难的不是“看不懂汇编”，而是“信息太多”。 尤其是面对几百万行、几百 MB 的 trace 日志时，人工逐行翻几乎不现实。这时候，AI 最适合扮演的角色不是“替你猜答案”，而是“帮你稳定地组织证据、缩小范围、验证猜想”。 这篇文章就是一个完整案例。 我们从 tr">
+<meta name="description" content="ai 时代下如何更好的利用 ai 去逆向(TikTok X-Gorgon 分析)引子很多时候，逆向真正难的不是“看不懂汇编”，而是“信息太多”。 尤其是面对几百万行、几百 MB 的 trace 日志时，人工逐行翻几乎不现实。这时候，AI 最适合扮演的角色不是“替你猜答案”，而是“帮你稳定地组织证据、缩小范围、验证猜想”。 这篇文章就是一个完整案例。 我们从 trace 中一个看起来很普通的固定字符">
 <meta property="og:type" content="article">
-<meta property="og:title" content="ai时代下如何更好的利用ai去逆向(TikTok X-Gorgon 分析)">
+<meta property="og:title" content="skuukzky">
 <meta property="og:url" content="https://lpy30m.github.io/skuukzky.github.io/2026/03/20/%E9%80%86%E5%90%91/ai%E6%97%B6%E4%BB%A3%E4%B8%8B%E5%A6%82%E4%BD%95%E6%9B%B4%E5%A5%BD%E7%9A%84%E5%88%A9%E7%94%A8ai%E5%8E%BB%E9%80%86%E5%90%91-TikTok-X-Gorgon-%E5%88%86%E6%9E%90/index.html">
 <meta property="og:site_name" content="skuukzky">
-<meta property="og:description" content="和 AI 一起做 Trace 逆向：从 8404a0480000 到魔改 RC4，再到最终值 ee5058db...引子很多时候，逆向真正难的不是“看不懂汇编”，而是“信息太多”。 尤其是面对几百万行、几百 MB 的 trace 日志时，人工逐行翻几乎不现实。这时候，AI 最适合扮演的角色不是“替你猜答案”，而是“帮你稳定地组织证据、缩小范围、验证猜想”。 这篇文章就是一个完整案例。 我们从 tr">
+<meta property="og:description" content="ai 时代下如何更好的利用 ai 去逆向(TikTok X-Gorgon 分析)引子很多时候，逆向真正难的不是“看不懂汇编”，而是“信息太多”。 尤其是面对几百万行、几百 MB 的 trace 日志时，人工逐行翻几乎不现实。这时候，AI 最适合扮演的角色不是“替你猜答案”，而是“帮你稳定地组织证据、缩小范围、验证猜想”。 这篇文章就是一个完整案例。 我们从 trace 中一个看起来很普通的固定字符">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2026-03-20T02:51:34.000Z">
-<meta property="article:modified_time" content="2026-03-20T03:05:07.886Z">
+<meta property="og:image" content="https://image.3001.net/images/20260320/1773978585_69bcc3d984ed213afb5ca.png">
+<meta property="article:published_time" content="2026-03-20T02:51:34.319Z">
+<meta property="article:modified_time" content="2026-03-20T06:23:08.059Z">
 <meta property="article:author" content="skuukzky">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://image.3001.net/images/20260320/1773978585_69bcc3d984ed213afb5ca.png">
 
 <link rel="stylesheet" href="/skuukzky.github.io/lib/fancybox/fancybox.css">
 <link rel="stylesheet" href="/skuukzky.github.io/lib/mdui_043tiny/mdui.css">
 
 
-<link rel="stylesheet" href="/skuukzky.github.io/lib/iconfont/iconfont.css?v=1773975949499">
+<link rel="stylesheet" href="/skuukzky.github.io/lib/iconfont/iconfont.css?v=1773987793486">
 
-<link rel="stylesheet" href="/skuukzky.github.io/css/style.css?v=1773975949499">
+<link rel="stylesheet" href="/skuukzky.github.io/css/style.css?v=1773987793486">
 
 
 
 
     
-        <link rel="stylesheet" href="/skuukzky.github.io/custom.css?v=1773975949499">
+        <link rel="stylesheet" href="/skuukzky.github.io/custom.css?v=1773987793486">
     
 
 
@@ -40,7 +42,7 @@
 <script src="/skuukzky.github.io/lib/lax.min.js" async></script>
 
 
-<script async src="/skuukzky.github.io/js/app.js?v=1773975949499"></script>
+<script async src="/skuukzky.github.io/js/app.js?v=1773987793486"></script>
 
  
 
@@ -196,7 +198,7 @@
 
         <li class="category-list-item">
           <a class="category-list-link" href="/skuukzky.github.io/categories/逆向/">逆向</a>
-          <span class="category-list-count">10</span>
+          <span class="category-list-count">9</span>
         </li>
 
         
@@ -232,17 +234,15 @@
 </div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
   <article>
     
-        <div class="nexmoe-post-cover absolute" style="padding-top: 33.33333333333333%;"> 
-            <img src="https://image.3001.net/images/20260320/1773975744_69bcb8c086b88a5289b4c.png" alt="ai时代下如何更好的利用ai去逆向(TikTok X-Gorgon 分析)" loading="lazy">
-            <h1>ai时代下如何更好的利用ai去逆向(TikTok X-Gorgon 分析)</h1>
+        <div class="nexmoe-post-cover"> 
+            <img src="https://image.3001.net/images/20250307/1741314829_67ca5b0d4957ea5241ba3.png" alt="" loading="lazy">
+            <h1></h1>
         </div>
     
     
     <div class="nexmoe-post-meta">
     <div class="nexmoe-rainbow">
         <a class="nexmoefont icon-calendar-fill">2026年03月20日</a>
-        
-            <a class="nexmoefont icon-appstore-fill -link" href="/skuukzky.github.io/categories/%E9%80%86%E5%90%91/">逆向</a>
         
         
     </div>
@@ -253,7 +253,7 @@
     
 </div>
 
-    <h1 id="和-AI-一起做-Trace-逆向：从-8404a0480000-到魔改-RC4，再到最终值-ee5058db"><a href="#和-AI-一起做-Trace-逆向：从-8404a0480000-到魔改-RC4，再到最终值-ee5058db" class="headerlink" title="和 AI 一起做 Trace 逆向：从 8404a0480000 到魔改 RC4，再到最终值 ee5058db..."></a>和 AI 一起做 Trace 逆向：从 <code>8404a0480000</code> 到魔改 RC4，再到最终值 <code>ee5058db...</code></h1><h2 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h2><p>很多时候，逆向真正难的不是“看不懂汇编”，而是“信息太多”。</p>
+    <h1 id="ai-时代下如何更好的利用-ai-去逆向-TikTok-X-Gorgon-分析"><a href="#ai-时代下如何更好的利用-ai-去逆向-TikTok-X-Gorgon-分析" class="headerlink" title="ai 时代下如何更好的利用 ai 去逆向(TikTok X-Gorgon 分析)"></a>ai 时代下如何更好的利用 ai 去逆向(TikTok X-Gorgon 分析)</h1><h2 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h2><p>很多时候，逆向真正难的不是“看不懂汇编”，而是“信息太多”。</p>
 <p>尤其是面对几百万行、几百 MB 的 trace 日志时，人工逐行翻几乎不现实。<br>这时候，AI 最适合扮演的角色不是“替你猜答案”，而是“帮你稳定地组织证据、缩小范围、验证猜想”。</p>
 <p>这篇文章就是一个完整案例。</p>
 <p>我们从 trace 中一个看起来很普通的固定字符串片段：</p>
@@ -270,15 +270,20 @@
 </ol>
 <figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">ee5058dbfb98bb0c48a807d688d9516d32e8dd0d</span></span></code></pre></div></div></figure>
 
+<p>ai 在应对汇编这种，是有天然优势的，但是我们无法把几百万行的汇编乃至上千万汇编直接丢改 ai 去分析，这时我们应该一些文件搜索工具去处理，慢慢去引导。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://image.3001.net/images/20260320/1773978585_69bcc3d984ed213afb5ca.png" alt="image-20260320114945008" data-caption="image-20260320114945008" loading="lazy"></p>
 <p>我想借这个过程，展示一件很重要的事：</p>
 <blockquote>
 <p>当你把 AI 放在“证据组织者”和“分析搭子”的位置上，而不是“拍脑袋给答案的工具”，它在逆向中会非常有价值。</p>
 </blockquote>
 <hr>
 <h2 id="分析目标"><a href="#分析目标" class="headerlink" title="分析目标"></a>分析目标</h2><p>一开始我们拿到的是一段运行时 trace，其中有这样一段：</p>
-<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">call func: free(0x6f68213970)</span></span>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">call func: free(0x6f68213970)</span></span>
 <span class="line"><span style="color: #abb2bf">hexdump at address 0x6f68213970 with length 0x0:</span></span>
-<span class="line"><span style="color: #abb2bf">6f68213970: 38 34 30 34 61 30 34 38 30 30 30 30 65 65 35 30 |8404a0480000ee50|</span></span></code></pre></div></div></figure>
+<span class="line"><span style="color: #abb2bf">6f68213970: 38 34 30 34 61 30 34 38 30 30 30 30 65 65 35 30 |8404a0480000ee50|</span></span>
+<span class="line"><span style="color: #abb2bf">6f68213980: 35 38 64 62 66 62 39 38 62 62 30 63 34 38 61 38 |58dbfb98bb0c48a8|</span></span>
+<span class="line"><span style="color: #abb2bf">6f68213990: 30 37 64 36 38 38 64 39 35 31 36 64 33 32 65 38 |07d688d9516d32e8|</span></span>
+<span class="line"><span style="color: #abb2bf">6f682139a0: 64 64 30 64                                     |dd0d            |</span></span></code></pre></div></div></figure>
 
 <p>这说明：</p>
 <ul>
@@ -432,6 +437,12 @@
 <span class="line"><span style="color: #abb2bf">10325476</span></span></code></pre></div></div></figure>
 
 <p>这正是经典 MD5 的初始状态。</p>
+<p>对应的初始化 trace 也很典型，直接能看到 <code>A/B/C/D</code> 四个初值被压到栈上：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">[libmetasec_ov.so] 0x6e68b6ee2c!0x14be2c str x9, [sp, #0x10]; x9=0x1032547698badcfe sp=0x6e5f0ba080 mem_w=0x6e5f0ba090</span></span>
+<span class="line"><span style="color: #abb2bf">[libmetasec_ov.so] 0x6e68b6ee30!0x14be30 str q0, [sp]; q0=0xefcdab89674523010000000000000000 sp=0x6e5f0ba080 mem_w=0x6e5f0ba080</span></span>
+<span class="line"><span style="color: #abb2bf">[libmetasec_ov.so] 0x6e68b6ee34!0x14be34 bl #0x6e68b6dafc</span></span>
+<span class="line"><span style="color: #abb2bf">[libmetasec_ov.so] 0x6e68b6dafc!0x14aafc stp x22, x21, [sp, #-0x30]!; x22=0x6e5f0ba160 x21=0x6e5f0ba350 sp=0x6e5f0ba080 mem_w=0x6e5f0ba050</span></span></code></pre></div></div></figure>
+
 <p>于是顺着这条线继续往上找，最终发现被做摘要的并不是某个 4 字节值，而是一整段 query string：</p>
 <figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">version_code=2023302050&amp;user_id=0&amp;aid=1233&amp;device_type=Pixel%206%20Pro&amp;app_name=musical_ly&amp;channel=googleplay&amp;os_version=13&amp;device_platform=android&amp;update_version_code=2023302050&amp;os_api=33&amp;device_brand=google&amp;version_name=33.2.5&amp;manifest_version_code=2023302050&amp;abi=arm64-v8a&amp;region=hk&amp;sys_region=hk&amp;cronet_version=996128d2_2024-01-12&amp;ttnet_version=4.2.137.48-tiktok&amp;use_store_region_cookie=1&amp;tnc_src=1&amp;delay=0</span></span></code></pre></div></div></figure>
 
@@ -440,6 +451,16 @@
 <span class="line"><span style="color: #abb2bf">-&gt; 去掉前缀 &quot;https://tnc16-platform-alisg.tiktokv.com/get_domains/v5/?&quot;</span></span>
 <span class="line"><span style="color: #abb2bf">-&gt; 只保留 query string</span></span>
 <span class="line"><span style="color: #abb2bf">-&gt; 做 MD5</span></span></code></pre></div></div></figure>
+
+<p>对应的 trace 里其实能直接看到这一步，它把 <code>?</code> 后面的参数段单独 <code>memmove</code> 出来了：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">call func: memmove(0x6ff81d5350, 0x70081e6b69, 0x19a)</span></span>
+<span class="line"><span style="color: #abb2bf">hexdump at address 0x70081e6b69 with length 0x19a:</span></span>
+<span class="line"><span style="color: #abb2bf">70081e6b69: 76 65 72 73 69 6f 6e 5f 63 6f 64 65 3d 32 30 32 |version_code=202|</span></span>
+<span class="line"><span style="color: #abb2bf">70081e6b79: 33 33 30 32 30 35 30 26 75 73 65 72 5f 69 64 3d |3302050&amp;user_id=|</span></span>
+<span class="line"><span style="color: #abb2bf">70081e6b89: 30 26 61 69 64 3d 31 32 33 33 26 64 65 76 69 63 |0&amp;aid=1233&amp;devic|</span></span>
+<span class="line"><span style="color: #abb2bf">70081e6b99: 65 5f 74 79 70 65 3d 50 69 78 65 6c 25 32 30 36 |e_type=Pixel%206|</span></span>
+<span class="line"><span style="color: #abb2bf">70081e6ba9: 25 32 30 50 72 6f 26 61 70 70 5f 6e 61 6d 65 3d |%20Pro&amp;app_name=|</span></span>
+<span class="line"><span style="color: #abb2bf">70081e6bb9: 6d 75 73 69 63 61 6c 5f 6c 79 26 63 68 61 6e 6e |musical_ly&amp;chann|</span></span></code></pre></div></div></figure>
 
 <p>我后来直接在本地复算了一遍：</p>
 <figure class="shiki python"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">import</span><span style="color: #ABB2BF"> hashlib</span></span>
@@ -567,6 +588,12 @@
 <p>RC4-like 单边更新变体</p>
 </blockquote>
 <p>而不是标准 RC4。</p>
+<p>从 trace 的单字节执行也能直接看到第一阶段确实在原地把 <code>0x11</code> 改成了 <code>0xfd</code>：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">[libmetasec_ov.so] 0x6e68aa31b0!0x801b0 ldrb w11, [x24, x22]; w11=0x4b x24=0x6f482848a6 x22=0x0 mem_r=0x6f482848a6 -&gt; w11=0x11</span></span>
+<span class="line"><span style="color: #abb2bf">[libmetasec_ov.so] 0x6e68aa31c4!0x801c4 ldrb w10, [x27, x10]; w10=0x3a x27=0x6e5f0b9d60 x10=0x3a mem_r=0x6e5f0b9d9a -&gt; w10=0xec</span></span>
+<span class="line"><span style="color: #abb2bf">[libmetasec_ov.so] 0x6e68aa31c8!0x801c8 eor w10, w10, w11; w10=0xec w10=0xec w11=0x11 -&gt; w10=0xfd</span></span>
+<span class="line"><span style="color: #abb2bf">[libmetasec_ov.so] 0x6e68aa31cc!0x801cc strb w10, [x24, x22]; w10=0xfd x24=0x6f482848a6 x22=0x0 mem_w=0x6f482848a6</span></span></code></pre></div></div></figure>
+
 <hr>
 <h2 id="第十一步：第二阶段是位运算变换"><a href="#第十一步：第二阶段是位运算变换" class="headerlink" title="第十一步：第二阶段是位运算变换"></a>第十一步：第二阶段是位运算变换</h2><p>第一阶段得到的是：</p>
 <figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">fd7f2a6ffaa7b441f3fa6de1a2ec827536f84f98</span></span></code></pre></div></div></figure>
@@ -692,6 +719,14 @@
 <p>AI 最强的地方，不是替你“神乎其神地猜中”，<br>而是陪你把一个复杂问题拆成很多小问题，然后每一步都做成有证据、可验证、可复现的结论。</p>
 </blockquote>
 <p>这才是它在逆向中最有价值的地方。<br>另文章也是 ai 写的，文字也毫无人机感。</p>
+<p>文章参考链接</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_28622215/article/details/159094786">深入解析 unidbg 动态追踪 X-Gorgon 生成算法</a></p>
+<p><a target="_blank" rel="noopener" href="https://bbs.kanxue.com/thread-285586.htm">[原创]unidbg 读写跟踪还原 X-Gorgon</a></p>
+<p><a target="_blank" rel="noopener" href="https://bbs.kanxue.com/thread-287614.htm">[原创]tt x-gorgon 分析</a></p>
+<p>工具链接</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/imj01y/trace-ui/">高性能 ARM64 执行 trace 可视化分析工具</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/lidongyooo/GumTrace">GumTrace</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/acejarvis/large-text-viewer">large-text-viewer</a></p>
 
     
   </article>
@@ -716,7 +751,7 @@
 </div>
   
   
-    <script async src="/skuukzky.github.io/js/copy-codeblock.js?v=1773975949479"></script>
+    <script async src="/skuukzky.github.io/js/copy-codeblock.js?v=1773987793467"></script>
   
 
   
@@ -750,7 +785,7 @@
             <button class="mdui-fab catalog" style="overflow:unset;">
                 <i class="nexmoefont icon-i-catalog"></i>
                 <div class="nexmoe-toc">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%92%8C-AI-%E4%B8%80%E8%B5%B7%E5%81%9A-Trace-%E9%80%86%E5%90%91%EF%BC%9A%E4%BB%8E-8404a0480000-%E5%88%B0%E9%AD%94%E6%94%B9-RC4%EF%BC%8C%E5%86%8D%E5%88%B0%E6%9C%80%E7%BB%88%E5%80%BC-ee5058db"><span class="toc-number">1.</span> <span class="toc-text">和 AI 一起做 Trace 逆向：从 8404a0480000 到魔改 RC4，再到最终值 ee5058db...</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E5%AD%90"><span class="toc-number">1.1.</span> <span class="toc-text">引子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E6%9E%90%E7%9B%AE%E6%A0%87"><span class="toc-number">1.2.</span> <span class="toc-text">分析目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E9%80%89%E6%8B%A9%EF%BC%9A%E5%85%88%E8%A7%A3%E5%86%B3%E2%80%9C%E5%A4%A7%E6%96%87%E4%BB%B6%E6%97%A0%E6%B3%95%E4%BA%BA%E5%B7%A5%E9%80%9A%E8%AF%BB%E2%80%9D%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">1.3.</span> <span class="toc-text">工具选择：先解决“大文件无法人工通读”的问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E5%85%88%E7%A1%AE%E8%AE%A4-8404-%E4%B8%8D%E6%98%AF%E7%AB%8B%E5%8D%B3%E6%95%B0%EF%BC%8C%E8%80%8C%E6%98%AF%E5%A0%86%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">1.4.</span> <span class="toc-text">第一步：先确认 8404... 不是立即数，而是堆字符串</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E7%A1%AE%E8%AE%A4%E8%BF%99%E4%B8%AA%E5%AD%97%E7%AC%A6%E4%B8%B2%E4%B8%8D%E6%98%AF%E2%80%9C%E7%9B%B4%E6%8E%A5%E6%8B%B7%E8%B4%9D%E6%9D%A5%E7%9A%84%E2%80%9D%EF%BC%8C%E8%80%8C%E6%98%AF%E2%80%9C%E5%8D%81%E5%85%AD%E8%BF%9B%E5%88%B6%E7%BC%96%E7%A0%81%E5%90%8E%E7%9A%84%E7%BB%93%E6%9E%9C%E2%80%9D"><span class="toc-number">1.5.</span> <span class="toc-text">第二步：确认这个字符串不是“直接拷贝来的”，而是“十六进制编码后的结果”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E6%89%BE%E5%88%B0%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%AF%B9%E5%BA%94%E7%9A%84%E5%8E%9F%E5%A7%8B-26-%E5%AD%97%E8%8A%82%E7%BC%93%E5%86%B2%E5%8C%BA"><span class="toc-number">1.6.</span> <span class="toc-text">第三步：找到字符串对应的原始 26 字节缓冲区</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E6%8A%8A-26-%E5%AD%97%E8%8A%82%E6%8B%86%E6%88%90%E2%80%9C%E5%A4%B4%E9%83%A8-6-%E5%AD%97%E8%8A%82-%E5%90%8E-20-%E5%AD%97%E8%8A%82%E2%80%9D"><span class="toc-number">1.7.</span> <span class="toc-text">第四步：把 26 字节拆成“头部 6 字节 + 后 20 字节”</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%A4%B4%E9%83%A8-6-%E5%AD%97%E8%8A%82"><span class="toc-number">1.7.1.</span> <span class="toc-text">1. 头部 6 字节</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%90%8E-20-%E5%AD%97%E8%8A%82"><span class="toc-number">1.7.2.</span> <span class="toc-text">2. 后 20 字节</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%BA%94%E6%AD%A5%EF%BC%9A%E6%89%BE%E5%88%B0-20-%E5%AD%97%E8%8A%82%E4%B8%AD%E9%97%B4%E6%9D%90%E6%96%99"><span class="toc-number">1.8.</span> <span class="toc-text">第五步：找到 20 字节中间材料</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%85%AD%E6%AD%A5%EF%BC%9A11-fd-bf-14-%E5%85%B6%E5%AE%9E%E6%98%AF-query-string-%E7%9A%84-MD5-%E5%89%8D-4-%E5%AD%97%E8%8A%82"><span class="toc-number">1.9.</span> <span class="toc-text">第六步：11 fd bf 14 其实是 query string 的 MD5 前 4 字节</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%83%E6%AD%A5%EF%BC%9A69-ba-a7-f5-%E6%98%AF%E7%A7%92%E7%BA%A7%E6%97%B6%E9%97%B4%E6%88%B3"><span class="toc-number">1.10.</span> <span class="toc-text">第七步：69 ba a7 f5 是秒级时间戳</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%85%AB%E6%AD%A5%EF%BC%9A20-05-00-05-%E6%98%AF%E6%9F%A5%E8%A1%A8%E5%BE%97%E5%88%B0%E7%9A%84%E5%B8%B8%E9%87%8F"><span class="toc-number">1.11.</span> <span class="toc-text">第八步：20 05 00 05 是查表得到的常量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B9%9D%E6%AD%A5%EF%BC%9A%E4%B8%AD%E9%97%B4-20-%E5%AD%97%E8%8A%82%E6%98%AF%E5%A6%82%E4%BD%95%E5%8F%98%E6%88%90-ee5058db-%E7%9A%84"><span class="toc-number">1.12.</span> <span class="toc-text">第九步：中间 20 字节是如何变成 ee5058db... 的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%8D%81%E6%AD%A5%EF%BC%9A%E7%AC%AC%E4%B8%80%E9%98%B6%E6%AE%B5%E4%B8%8D%E6%98%AF%E6%A0%87%E5%87%86-RC4%EF%BC%8C%E8%80%8C%E6%98%AF-RC4-like-%E7%9A%84%E9%AD%94%E6%94%B9%E5%8F%98%E4%BD%93"><span class="toc-number">1.13.</span> <span class="toc-text">第十步：第一阶段不是标准 RC4，而是 RC4-like 的魔改变体</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#KSA-%E9%98%B6%E6%AE%B5"><span class="toc-number">1.13.1.</span> <span class="toc-text">KSA 阶段</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PRGA-%E9%98%B6%E6%AE%B5"><span class="toc-number">1.13.2.</span> <span class="toc-text">PRGA 阶段</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%8D%81%E4%B8%80%E6%AD%A5%EF%BC%9A%E7%AC%AC%E4%BA%8C%E9%98%B6%E6%AE%B5%E6%98%AF%E4%BD%8D%E8%BF%90%E7%AE%97%E5%8F%98%E6%8D%A2"><span class="toc-number">1.14.</span> <span class="toc-text">第十一步：第二阶段是位运算变换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%8D%81%E4%BA%8C%E6%AD%A5%EF%BC%9A%E6%9C%80%E7%BB%88%E5%AE%8C%E6%95%B4%E9%93%BE%E8%B7%AF"><span class="toc-number">1.15.</span> <span class="toc-text">第十二步：最终完整链路</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BE%93%E5%85%A5%E7%A7%8D%E5%AD%90"><span class="toc-number">1.15.1.</span> <span class="toc-text">输入种子</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E9%98%B6%E6%AE%B5%E8%BE%93%E5%87%BA"><span class="toc-number">1.15.2.</span> <span class="toc-text">第一阶段输出</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E9%98%B6%E6%AE%B5%E8%BE%93%E5%87%BA"><span class="toc-number">1.15.3.</span> <span class="toc-text">第二阶段输出</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%BC%E6%8E%A5%E6%88%90%E6%9C%80%E7%BB%88-26-%E5%AD%97%E8%8A%82-raw-buffer"><span class="toc-number">1.15.4.</span> <span class="toc-text">拼接成最终 26 字节 raw buffer</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%8D%E8%BD%AC%E6%88%90-hex-%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">1.15.5.</span> <span class="toc-text">再转成 hex 字符串</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%8D%81%E4%B8%89%E6%AD%A5%EF%BC%9A%E6%8A%8A-AI-%E7%9C%9F%E6%AD%A3%E6%94%BE%E5%9C%A8%E2%80%9C%E5%88%86%E6%9E%90%E6%90%AD%E5%AD%90%E2%80%9D%E7%9A%84%E4%BD%8D%E7%BD%AE%E4%B8%8A"><span class="toc-number">1.16.</span> <span class="toc-text">第十三步：把 AI 真正放在“分析搭子”的位置上</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%B8%8D%E8%A6%81%E8%AE%A9-AI-%E7%9B%B4%E6%8E%A5%E7%8C%9C%E7%AD%94%E6%A1%88"><span class="toc-number">1.16.1.</span> <span class="toc-text">1. 不要让 AI 直接猜答案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%85%88%E6%94%B6%E7%BC%A9%E9%97%AE%E9%A2%98%EF%BC%8C%E5%86%8D%E8%B0%88%E7%AE%97%E6%B3%95"><span class="toc-number">1.16.2.</span> <span class="toc-text">2. 先收缩问题，再谈算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%85%88%E8%AF%81%E5%AE%9E%E2%80%9C%E8%BF%99%E4%B8%80%E6%AD%A5%E6%98%AF%E4%BB%80%E4%B9%88%E2%80%9D%EF%BC%8C%E5%86%8D%E5%8E%BB%E5%91%BD%E5%90%8D%E2%80%9C%E5%AE%83%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E6%A0%B7%E8%AE%BE%E8%AE%A1%E2%80%9D"><span class="toc-number">1.16.3.</span> <span class="toc-text">3. 先证实“这一步是什么”，再去命名“它为什么这样设计”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E8%83%BD%E5%86%99%E6%88%90%E8%84%9A%E6%9C%AC%E7%9A%84%EF%BC%8C%E4%B8%80%E5%AE%9A%E5%86%99%E6%88%90%E8%84%9A%E6%9C%AC"><span class="toc-number">1.16.4.</span> <span class="toc-text">4. 能写成脚本的，一定写成脚本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%EF%BC%9A%E6%9C%80%E7%BB%88"><span class="toc-number">1.17.</span> <span class="toc-text">附：最终</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AF%AD"><span class="toc-number">1.18.</span> <span class="toc-text">结语</span></a></li></ol></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ai-%E6%97%B6%E4%BB%A3%E4%B8%8B%E5%A6%82%E4%BD%95%E6%9B%B4%E5%A5%BD%E7%9A%84%E5%88%A9%E7%94%A8-ai-%E5%8E%BB%E9%80%86%E5%90%91-TikTok-X-Gorgon-%E5%88%86%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">ai 时代下如何更好的利用 ai 去逆向(TikTok X-Gorgon 分析)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E5%AD%90"><span class="toc-number">1.1.</span> <span class="toc-text">引子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E6%9E%90%E7%9B%AE%E6%A0%87"><span class="toc-number">1.2.</span> <span class="toc-text">分析目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E9%80%89%E6%8B%A9%EF%BC%9A%E5%85%88%E8%A7%A3%E5%86%B3%E2%80%9C%E5%A4%A7%E6%96%87%E4%BB%B6%E6%97%A0%E6%B3%95%E4%BA%BA%E5%B7%A5%E9%80%9A%E8%AF%BB%E2%80%9D%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">1.3.</span> <span class="toc-text">工具选择：先解决“大文件无法人工通读”的问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E5%85%88%E7%A1%AE%E8%AE%A4-8404-%E4%B8%8D%E6%98%AF%E7%AB%8B%E5%8D%B3%E6%95%B0%EF%BC%8C%E8%80%8C%E6%98%AF%E5%A0%86%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">1.4.</span> <span class="toc-text">第一步：先确认 8404... 不是立即数，而是堆字符串</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E7%A1%AE%E8%AE%A4%E8%BF%99%E4%B8%AA%E5%AD%97%E7%AC%A6%E4%B8%B2%E4%B8%8D%E6%98%AF%E2%80%9C%E7%9B%B4%E6%8E%A5%E6%8B%B7%E8%B4%9D%E6%9D%A5%E7%9A%84%E2%80%9D%EF%BC%8C%E8%80%8C%E6%98%AF%E2%80%9C%E5%8D%81%E5%85%AD%E8%BF%9B%E5%88%B6%E7%BC%96%E7%A0%81%E5%90%8E%E7%9A%84%E7%BB%93%E6%9E%9C%E2%80%9D"><span class="toc-number">1.5.</span> <span class="toc-text">第二步：确认这个字符串不是“直接拷贝来的”，而是“十六进制编码后的结果”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E6%89%BE%E5%88%B0%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%AF%B9%E5%BA%94%E7%9A%84%E5%8E%9F%E5%A7%8B-26-%E5%AD%97%E8%8A%82%E7%BC%93%E5%86%B2%E5%8C%BA"><span class="toc-number">1.6.</span> <span class="toc-text">第三步：找到字符串对应的原始 26 字节缓冲区</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E6%8A%8A-26-%E5%AD%97%E8%8A%82%E6%8B%86%E6%88%90%E2%80%9C%E5%A4%B4%E9%83%A8-6-%E5%AD%97%E8%8A%82-%E5%90%8E-20-%E5%AD%97%E8%8A%82%E2%80%9D"><span class="toc-number">1.7.</span> <span class="toc-text">第四步：把 26 字节拆成“头部 6 字节 + 后 20 字节”</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%A4%B4%E9%83%A8-6-%E5%AD%97%E8%8A%82"><span class="toc-number">1.7.1.</span> <span class="toc-text">1. 头部 6 字节</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%90%8E-20-%E5%AD%97%E8%8A%82"><span class="toc-number">1.7.2.</span> <span class="toc-text">2. 后 20 字节</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%BA%94%E6%AD%A5%EF%BC%9A%E6%89%BE%E5%88%B0-20-%E5%AD%97%E8%8A%82%E4%B8%AD%E9%97%B4%E6%9D%90%E6%96%99"><span class="toc-number">1.8.</span> <span class="toc-text">第五步：找到 20 字节中间材料</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%85%AD%E6%AD%A5%EF%BC%9A11-fd-bf-14-%E5%85%B6%E5%AE%9E%E6%98%AF-query-string-%E7%9A%84-MD5-%E5%89%8D-4-%E5%AD%97%E8%8A%82"><span class="toc-number">1.9.</span> <span class="toc-text">第六步：11 fd bf 14 其实是 query string 的 MD5 前 4 字节</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%83%E6%AD%A5%EF%BC%9A69-ba-a7-f5-%E6%98%AF%E7%A7%92%E7%BA%A7%E6%97%B6%E9%97%B4%E6%88%B3"><span class="toc-number">1.10.</span> <span class="toc-text">第七步：69 ba a7 f5 是秒级时间戳</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%85%AB%E6%AD%A5%EF%BC%9A20-05-00-05-%E6%98%AF%E6%9F%A5%E8%A1%A8%E5%BE%97%E5%88%B0%E7%9A%84%E5%B8%B8%E9%87%8F"><span class="toc-number">1.11.</span> <span class="toc-text">第八步：20 05 00 05 是查表得到的常量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B9%9D%E6%AD%A5%EF%BC%9A%E4%B8%AD%E9%97%B4-20-%E5%AD%97%E8%8A%82%E6%98%AF%E5%A6%82%E4%BD%95%E5%8F%98%E6%88%90-ee5058db-%E7%9A%84"><span class="toc-number">1.12.</span> <span class="toc-text">第九步：中间 20 字节是如何变成 ee5058db... 的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%8D%81%E6%AD%A5%EF%BC%9A%E7%AC%AC%E4%B8%80%E9%98%B6%E6%AE%B5%E4%B8%8D%E6%98%AF%E6%A0%87%E5%87%86-RC4%EF%BC%8C%E8%80%8C%E6%98%AF-RC4-like-%E7%9A%84%E9%AD%94%E6%94%B9%E5%8F%98%E4%BD%93"><span class="toc-number">1.13.</span> <span class="toc-text">第十步：第一阶段不是标准 RC4，而是 RC4-like 的魔改变体</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#KSA-%E9%98%B6%E6%AE%B5"><span class="toc-number">1.13.1.</span> <span class="toc-text">KSA 阶段</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PRGA-%E9%98%B6%E6%AE%B5"><span class="toc-number">1.13.2.</span> <span class="toc-text">PRGA 阶段</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%8D%81%E4%B8%80%E6%AD%A5%EF%BC%9A%E7%AC%AC%E4%BA%8C%E9%98%B6%E6%AE%B5%E6%98%AF%E4%BD%8D%E8%BF%90%E7%AE%97%E5%8F%98%E6%8D%A2"><span class="toc-number">1.14.</span> <span class="toc-text">第十一步：第二阶段是位运算变换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%8D%81%E4%BA%8C%E6%AD%A5%EF%BC%9A%E6%9C%80%E7%BB%88%E5%AE%8C%E6%95%B4%E9%93%BE%E8%B7%AF"><span class="toc-number">1.15.</span> <span class="toc-text">第十二步：最终完整链路</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BE%93%E5%85%A5%E7%A7%8D%E5%AD%90"><span class="toc-number">1.15.1.</span> <span class="toc-text">输入种子</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E9%98%B6%E6%AE%B5%E8%BE%93%E5%87%BA"><span class="toc-number">1.15.2.</span> <span class="toc-text">第一阶段输出</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E9%98%B6%E6%AE%B5%E8%BE%93%E5%87%BA"><span class="toc-number">1.15.3.</span> <span class="toc-text">第二阶段输出</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%BC%E6%8E%A5%E6%88%90%E6%9C%80%E7%BB%88-26-%E5%AD%97%E8%8A%82-raw-buffer"><span class="toc-number">1.15.4.</span> <span class="toc-text">拼接成最终 26 字节 raw buffer</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%8D%E8%BD%AC%E6%88%90-hex-%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">1.15.5.</span> <span class="toc-text">再转成 hex 字符串</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%8D%81%E4%B8%89%E6%AD%A5%EF%BC%9A%E6%8A%8A-AI-%E7%9C%9F%E6%AD%A3%E6%94%BE%E5%9C%A8%E2%80%9C%E5%88%86%E6%9E%90%E6%90%AD%E5%AD%90%E2%80%9D%E7%9A%84%E4%BD%8D%E7%BD%AE%E4%B8%8A"><span class="toc-number">1.16.</span> <span class="toc-text">第十三步：把 AI 真正放在“分析搭子”的位置上</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%B8%8D%E8%A6%81%E8%AE%A9-AI-%E7%9B%B4%E6%8E%A5%E7%8C%9C%E7%AD%94%E6%A1%88"><span class="toc-number">1.16.1.</span> <span class="toc-text">1. 不要让 AI 直接猜答案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%85%88%E6%94%B6%E7%BC%A9%E9%97%AE%E9%A2%98%EF%BC%8C%E5%86%8D%E8%B0%88%E7%AE%97%E6%B3%95"><span class="toc-number">1.16.2.</span> <span class="toc-text">2. 先收缩问题，再谈算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%85%88%E8%AF%81%E5%AE%9E%E2%80%9C%E8%BF%99%E4%B8%80%E6%AD%A5%E6%98%AF%E4%BB%80%E4%B9%88%E2%80%9D%EF%BC%8C%E5%86%8D%E5%8E%BB%E5%91%BD%E5%90%8D%E2%80%9C%E5%AE%83%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E6%A0%B7%E8%AE%BE%E8%AE%A1%E2%80%9D"><span class="toc-number">1.16.3.</span> <span class="toc-text">3. 先证实“这一步是什么”，再去命名“它为什么这样设计”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E8%83%BD%E5%86%99%E6%88%90%E8%84%9A%E6%9C%AC%E7%9A%84%EF%BC%8C%E4%B8%80%E5%AE%9A%E5%86%99%E6%88%90%E8%84%9A%E6%9C%AC"><span class="toc-number">1.16.4.</span> <span class="toc-text">4. 能写成脚本的，一定写成脚本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%EF%BC%9A%E6%9C%80%E7%BB%88"><span class="toc-number">1.17.</span> <span class="toc-text">附：最终</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AF%AD"><span class="toc-number">1.18.</span> <span class="toc-text">结语</span></a></li></ol></li></ol>
                 </div>
             </button>
             
