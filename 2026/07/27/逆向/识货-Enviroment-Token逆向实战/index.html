@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>从 getToken 的空转发，到 A_e 的七个分块：识货 Enviroment Token 逆向复盘 - skuukzky</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<meta name="description" content="从 getToken 的空转发，到 A_e 的七个分块：识货 Enviroment Token 逆向复盘 本文记录的是一次在自有测试环境中完成的动态分析。公开版已经移除完整 token、真实调用参数、精确时间戳与设备数据。文中所有地址均以模块相对偏移表示；一次运行里的绝对地址没有复用价值。  这次分析真正费时间的地方，并不是判断出“AES-128-ECB”，而是承认我们一开始把入口选大了。 最初拿">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从 getToken 的空转发，到 A_e 的七个分块：识货 Enviroment Token 逆向复盘">
+<meta property="og:url" content="https://lpy30m.github.io/skuukzky.github.io/2026/07/27/%E9%80%86%E5%90%91/%E8%AF%86%E8%B4%A7-Enviroment-Token%E9%80%86%E5%90%91%E5%AE%9E%E6%88%98/index.html">
+<meta property="og:site_name" content="skuukzky">
+<meta property="og:description" content="从 getToken 的空转发，到 A_e 的七个分块：识货 Enviroment Token 逆向复盘 本文记录的是一次在自有测试环境中完成的动态分析。公开版已经移除完整 token、真实调用参数、精确时间戳与设备数据。文中所有地址均以模块相对偏移表示；一次运行里的绝对地址没有复用价值。  这次分析真正费时间的地方，并不是判断出“AES-128-ECB”，而是承认我们一开始把入口选大了。 最初拿">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-07-27T02:49:18.000Z">
+<meta property="article:modified_time" content="2026-07-27T02:50:29.530Z">
+<meta property="article:author" content="skuukzky">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Frida">
+<meta property="article:tag" content="ARM64">
+<meta property="article:tag" content="AES">
+<meta name="twitter:card" content="summary">
+
+<link rel="stylesheet" href="/skuukzky.github.io/lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="/skuukzky.github.io/lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="/skuukzky.github.io/lib/iconfont/iconfont.css?v=1785120669531">
+
+<link rel="stylesheet" href="/skuukzky.github.io/css/style.css?v=1785120669531">
+
+
+
+
+    
+        <link rel="stylesheet" href="/skuukzky.github.io/custom.css?v=1785120669531">
+    
+
+
+
+<script src="/skuukzky.github.io/lib/mdui_043tiny/mdui.js" async></script>
+<script src="/skuukzky.github.io/lib/fancybox/fancybox.umd.js" async></script>
+<script src="/skuukzky.github.io/lib/lax.min.js" async></script>
+
+
+<script async src="/skuukzky.github.io/js/app.js?v=1785120669531"></script>
+
+ 
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4D4ZJ9G024"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag("js", new Date());
+
+  gtag("config", "G-4D4ZJ9G024");
+</script>
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-shiki-plugin@latest/lib/codeblock.css">
+<style>:root{--hl-color:#abb2bf;--hl-bg:#282c34;--hltools-bg:#21252b;--hltools-color:#bbbbbc;--hlnumber-bg:#282c34;--hlnumber-color:#495162;--hlscrollbar-bg:#373c47;--hlexpand-bg:linear-gradient(180deg,rgba(40,44,52,0.1),rgba(40,44,52,0.9))}</style>
+    <style>
+    .code-expand-btn:not(.expand-done) ~ div.codeblock,
+    .code-expand-btn:not(.expand-done) ~ * div.codeblock {
+      overflow: hidden;
+      height: 360px;
+    }
+    </style>
+  <!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(https://image.3001.net/images/20250307/1741314829_67ca5b0d4957ea5241ba3.png)"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="/skuukzky.github.io/" title="skuukzky"><img src="https://image.3001.net/images/20250307/1741314773_67ca5ad59320935fabc37.png" alt="skuukzky"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/skuukzky.github.io/" title="skuukzky">
+            <img src="https://image.3001.net/images/20250307/1741314773_67ca5ad59320935fabc37.png" alt="skuukzky" alt="skuukzky">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>文章</span>16</div>
+        <div><span>标签</span>4</div>
+        <div><span>分类</span>2</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/" title="回到首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                回到首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/archive.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/PY.html" title="我的朋友">
+            <i class="mdui-list-item-icon nexmoefont icon-unorderedlist"></i>
+            <div class="mdui-list-item-content">
+                我的朋友
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/donate.html" title="给我赞助">
+            <i class="mdui-list-item-icon nexmoefont icon-coffee"></i>
+            <div class="mdui-list-item-content">
+                给我赞助
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/about.html" title="关于博主">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于博主
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+         
+            <form id="search_form" action_e="https://cn.bing.com/search?q=site:nexmoe.com" onsubmit="return search();">
+                <label><input id="search_value" name="q" type="search" placeholder="搜索"></label>
+            </form>
+         
+    </div>
+</div>
+
+
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="https://space.bilibili.com/603975910"
+			target="_blank"
+			mdui-tooltip="{content: '哔哩哔哩'}"
+			style="
+				color: rgb(231, 106, 141);
+				background-color: rgba(231, 106, 141, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/lpy30m/"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://nexmoe.com/atom.xml"
+			target="_blank"
+			mdui-tooltip="{content: 'RSS'}"
+			style="
+				color: rgb(247, 132, 34);
+				background-color: rgba(247, 132, 34, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-rss"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章分类</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/skuukzky.github.io/categories/逆向/">逆向</a>
+          <span class="category-list-count">10</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/skuukzky.github.io/categories/验证码识别/">验证码识别</a>
+          <span class="category-list-count">4</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <div id="randomtagcloud" class="nexmoe-widget tagcloud nexmoe-rainbow">
+      <a href="/skuukzky.github.io/tags/AES/" style="font-size: 10px;">AES</a> <a href="/skuukzky.github.io/tags/ARM64/" style="font-size: 10px;">ARM64</a> <a href="/skuukzky.github.io/tags/Android/" style="font-size: 10px;">Android</a> <a href="/skuukzky.github.io/tags/Frida/" style="font-size: 10px;">Frida</a>
+    </div>
+    
+      <script>
+        var maxTagcloud = parseInt(17);
+        var tags_length = parseInt(4);
+        var tags_arr = [];
+        for(var i = 0; i < tags_length; i++){
+          tags_arr.push(i);
+        }
+        tags_arr.sort(function (l, r) {
+          return Math.random() > 0.5 ? -1 : 1;
+        });
+        tags_arr = tags_arr.slice(0, maxTagcloud < tags_length ? tags_length - maxTagcloud : 0);
+        for(var tag_i = 0; tag_i < tags_arr.length; tag_i++){
+          document.getElementById("randomtagcloud").children[tags_arr[tag_i]].style.display = 'none';
+        }
+      </script>
+    
+  </div>
+
+    
+        
+        
+        
+        
+   
+    <div class="nexmoe-copyright">
+        &copy; 2026 skuukzky
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        <br><a target="_blank" href="https://beian.miit.gov.cn/"></a>
+
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover"> 
+            <img src="https://image.3001.net/images/20250307/1741314829_67ca5b0d4957ea5241ba3.png" alt="从 getToken 的空转发，到 A_e 的七个分块：识货 Enviroment Token 逆向复盘" loading="lazy">
+            <h1>从 getToken 的空转发，到 A_e 的七个分块：识货 Enviroment Token 逆向复盘</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2026年07月27日</a>
+        
+            <a class="nexmoefont icon-appstore-fill -link" href="/skuukzky.github.io/categories/%E9%80%86%E5%90%91/">逆向</a>
+        
+        
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <h1 id="从-getToken-的空转发，到-A-e-的七个分块：识货-Enviroment-Token-逆向复盘"><a href="#从-getToken-的空转发，到-A-e-的七个分块：识货-Enviroment-Token-逆向复盘" class="headerlink" title="从 getToken 的空转发，到 A_e 的七个分块：识货 Enviroment Token 逆向复盘"></a>从 getToken 的空转发，到 A_e 的七个分块：识货 Enviroment Token 逆向复盘</h1><blockquote>
+<p>本文记录的是一次在自有测试环境中完成的动态分析。公开版已经移除完整 token、真实调用参数、精确时间戳与设备数据。文中所有地址均以模块相对偏移表示；一次运行里的绝对地址没有复用价值。</p>
+</blockquote>
+<p>这次分析真正费时间的地方，并不是判断出“AES-128-ECB”，而是承认我们一开始把入口选大了。</p>
+<p>最初拿到的方法签名很诱人：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">java.lang.String com.shihuo.shsecsdk.Enviroment.getToken(</span></span>
+<span class="line"><span style="color: #abb2bf">    java.lang.String,</span></span>
+<span class="line"><span style="color: #abb2bf">    java.lang.String</span></span>
+<span class="line"><span style="color: #abb2bf">)</span></span></code></pre></div></div></figure>
+
+<p>名字已经把答案写在脸上，第一反应当然是围着 getToken 追。结果 trace 越跑越大，能看到大量 JNI、字符串处理、内存操作和混淆控制流，却迟迟找不到一条能把输入、密钥、密文和最终返回值连起来的短路径。</p>
+<p>后来回头看，这段弯路反而很典型：Java 层的方法名告诉了我们“业务从哪里进”，却不一定告诉我们“算法在哪里做”。getToken 在这条执行路径里更像一层调度和转发。继续守着它，只会把上层噪声和真正的 native 计算一起装进 trace。</p>
+<p>真正的突破，是把问题从“getToken 做了什么”换成了“最终 token 在哪一层被构造出来”。</p>
+<h2 id="从-getToken-一层层下沉"><a href="#从-getToken-一层层下沉" class="headerlink" title="从 getToken 一层层下沉"></a>从 getToken 一层层下沉</h2><p>我们先确认了 getToken 所在的 native 位置：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">libldp.so + 0x181d10</span></span></code></pre></div></div></figure>
+
+<p>沿调用关系继续向下，进入同一个类的另一个 native 方法：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">java.lang.String com.shihuo.shsecsdk.Enviroment.initRiskInfo(</span></span>
+<span class="line"><span style="color: #abb2bf">    java.lang.String,</span></span>
+<span class="line"><span style="color: #abb2bf">    java.lang.String,</span></span>
+<span class="line"><span style="color: #abb2bf">    java.lang.String</span></span>
+<span class="line"><span style="color: #abb2bf">)</span></span>
+<span class="line"><span style="color: #abb2bf"></span></span>
+<span class="line"><span style="color: #abb2bf">libldp.so + 0x1c2cc8</span></span></code></pre></div></div></figure>
+
+<p>initRiskInfo 仍然不是最终计算点。它把环境信息整理后，又交给 nativeInfo：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">java.lang.String com.shihuo.shsecsdk.Enviroment.nativeInfo(</span></span>
+<span class="line"><span style="color: #abb2bf">    java.lang.String</span></span>
+<span class="line"><span style="color: #abb2bf">)</span></span>
+<span class="line"><span style="color: #abb2bf"></span></span>
+<span class="line"><span style="color: #abb2bf">libsh_security.so + 0xf92d8</span></span></code></pre></div></div></figure>
+
+<p>到了 nativeInfo，分析对象才从 libldp.so 转进 libsh_security.so。也就是在这里，我们第一次接近真正负责数据封装和加密的代码。</p>
+<p>最后收敛出的主干并不长：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">getToken</span></span>
+<span class="line"><span style="color: #abb2bf">  -&gt; initRiskInfo</span></span>
+<span class="line"><span style="color: #abb2bf">    -&gt; nativeInfo</span></span>
+<span class="line"><span style="color: #abb2bf">      -&gt; A_P_E  (libsh_security.so + 0xc80e0)</span></span>
+<span class="line"><span style="color: #abb2bf">        -&gt; 7 × A_e (libsh_security.so + 0xc74dc)</span></span>
+<span class="line"><span style="color: #abb2bf">          -&gt; AES inner (libsh_security.so + 0xc76c0)</span></span>
+<span class="line"><span style="color: #abb2bf">        -&gt; b64_encode (libsh_security.so + 0xc6ef0)</span></span>
+<span class="line"><span style="color: #abb2bf">      -&gt; JNI NewString (libsh_security.so + 0xddc00)</span></span></code></pre></div></div></figure>
+
+<p>A_P_E 可以理解为这一段封装逻辑的总入口，A_e 则处理单个 16 字节分块。这个判断不是先看反编译器给函数起了什么名字，而是从动态调用次数、内存内容和输入输出长度逐步对上的。</p>
+<h2 id="41-MB-trace-为什么没有继续硬啃"><a href="#41-MB-trace-为什么没有继续硬啃" class="headerlink" title="41 MB trace 为什么没有继续硬啃"></a>41 MB trace 为什么没有继续硬啃</h2><p>最早那份 trace 超过 41 MB。理论上当然可以继续搜索，但实际分析时，每向前追一次值，都可能遇到大量不相关分支；而且脚本在加载时立刻开启 Stalker，会把应用启动、SDK 初始化和其他线程也卷进来。在目标设备上，这种“从进程一开始就全程 trace”的方式还容易让 Frida 会话直接崩掉。</p>
+<p>于是我们把触发方式改成了手动 gate：</p>
+<ul>
+<li>脚本加载时只安装必要的 hook，不立即开始 trace；</li>
+<li>由主动调用 Enviroment 方法的 RPC 入口打开 gate；</li>
+<li>只跟踪执行主动调用的当前线程；</li>
+<li>调用结束后立即关闭 gate、停止 Stalker 并落盘；</li>
+<li>输出写进应用自己的 files 目录，避开无权限的临时目录。</li>
+</ul>
+<p>这不是单纯为了把文件变小。更重要的是，trace 的边界第一次和“我们主动发起的那一次调用”对齐了。后来重新打开的收窄 trace 约 6.4 MB，包含 67,235 个 Trace UI 的 0-based seq、79 个动态 function node。规模依然不算小，但已经可以沿 call tree 做人工复核。</p>
+<h2 id="call-tree-里出现了七个相同的孩子"><a href="#call-tree-里出现了七个相同的孩子" class="headerlink" title="call tree 里出现了七个相同的孩子"></a>call tree 里出现了七个相同的孩子</h2><p>在 Trace UI 中定位到 A_P_E 后，call tree 给出的形状非常干净：下面连续出现 7 个 A_e 分支，每个分支都有一个 AES 内层调用；七个分块之后，又出现一个 Base64 子调用。</p>
+<p>这和输入长度正好吻合。</p>
+<p>nativeInfo 接收到的紧凑 JSON 是 105 字节。PKCS#7 补齐到 16 的倍数后变成 112 字节，也就是：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">105-byte JSON</span></span>
+<span class="line"><span style="color: #abb2bf">  + 7 bytes of 0x07 padding</span></span>
+<span class="line"><span style="color: #abb2bf">  = 112 bytes</span></span>
+<span class="line"><span style="color: #abb2bf">  = 7 × 16-byte blocks</span></span></code></pre></div></div></figure>
+
+<p>在 trace 里，seq 292、295、296、303 附近可以看到这次从原始 JSON 到补齐缓冲区的变化。第一轮 A_e 从 seq 40803 附近开始，第七轮出现在 seq 61095 附近。随后 seq 64475 进入 b64_encode，seq 67174 则在 Base64 结果偏移 0x98 的位置写入字符串终止符。</p>
+<p>这些 seq 的价值不在于“记住几个数字”，而在于它们把三个原本分散的观察连在了一起：105 字节输入、7 次固定大小调用、112 字节密文。到这一步，七次 A_e 已经很难再解释成偶然的循环。</p>
+<h2 id="trace-看不到的-key，用-capture-补上"><a href="#trace-看不到的-key，用-capture-补上" class="headerlink" title="trace 看不到的 key，用 capture 补上"></a>trace 看不到的 key，用 capture 补上</h2><p>这里还有一个容易误判的问题：trace 的第一条指令并不等于数据的出生点。</p>
+<p>A_P_E 进入 trace 之前，某些关键内存已经由上游准备好了。只看指令写入历史，会发现 key18 像是“凭空出现”的；如果据此断言 trace 不完整或者算法不可还原，就会在边界上卡住。</p>
+<p>我们在 A_P_E 和 A_e 的边界增加了 Frida capture，把寄存器指针指向的内存按已知长度保存下来，再导入 Trace UI 与指令序列对齐。收窄后的数据中一共有 17 个 capture event，其中包含 7 次 A_e 的入口材料。这样既保留了 Stalker 的控制流，也补齐了 trace 开始之前已经存在的 key 和明文块。</p>
+<p>对单次 A_e 逐项对照后，调用约定可以写成：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">X0 = plaintext16</span></span>
+<span class="line"><span style="color: #abb2bf">X1 = key18</span></span>
+<span class="line"><span style="color: #abb2bf">X2 = ciphertext16 output</span></span></code></pre></div></div></figure>
+
+<p>X1 指向的是 18 字节小写十六进制文本，但 AES 实际只读取它前 16 个 ASCII 字节。这里的“ASCII”很关键：它不是把十六进制字符串解码成 8 字节，也不是使用 MD5 的 16 字节 raw digest。</p>
+<h2 id="Unknown-不是失败，完整复算才是算法证据"><a href="#Unknown-不是失败，完整复算才是算法证据" class="headerlink" title="Unknown 不是失败，完整复算才是算法证据"></a>Unknown 不是失败，完整复算才是算法证据</h2><p>自动结构扫描曾经给部分局部窗口标成 Unknown 或 Related。这个结果并不奇怪：我们面对的是经过编译和混淆的 native 实现，单靠某一小段指令形状，不一定能稳定识别出标准 AES 轮函数。</p>
+<p>我们没有把结构标签当作结论，而是换成更直接的验证方式：</p>
+<ol>
+<li>从 capture 取出完整 key18；</li>
+<li>从指定 seq 重建每个 16 字节输入块；</li>
+<li>从输出地址重建 7 个密文块；</li>
+<li>用 key18 前 16 个 ASCII 字节分别做 AES-128-ECB 加密和解密；</li>
+<li>按字节与动态内存中的真实结果比较。</li>
+</ol>
+<p>Trace UI 对完整 Encrypt 和 Decrypt 都给出了 VerifiedFull：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">7 / 7 blocks matched</span></span>
+<span class="line"><span style="color: #abb2bf">112 / 112 bytes matched</span></span></code></pre></div></div></figure>
+
+<p>因此本文把“自动扫描看到类似 AES 的结构”和“完整 key、input、output 复算一致”分成两个证据等级。前者只能帮助找方向，后者才足以支撑这里使用 AES-128-ECB 的判断。</p>
+<p>复算同时确认了这几个细节：</p>
+<ul>
+<li>分组长度为 16 字节；</li>
+<li>模式为 ECB，没有 IV；</li>
+<li>明文先做 PKCS#7 padding；</li>
+<li>7 个分块都使用同一把 16 字节 ASCII key；</li>
+<li>密文拼接后再统一 Base64。</li>
+</ul>
+<h2 id="r-57-这一份样本，key-到底怎么来"><a href="#r-57-这一份样本，key-到底怎么来" class="headerlink" title="r&#x3D;57 这一份样本，key 到底怎么来"></a>r&#x3D;57 这一份样本，key 到底怎么来</h2><p>加密本身确认以后，剩下的是 key18 的派生。</p>
+<p>在其中一份真实样本里，随机值 r 为 57。派生过程可以还原为：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">r = 57</span></span>
+<span class="line"><span style="color: #abb2bf">shift = r % 10 + 1 = 8</span></span>
+<span class="line"><span style="color: #abb2bf"></span></span>
+<span class="line"><span style="color: #abb2bf">transformed = sMuOwAyCa[c]e_gQiSkUmWoIqK</span></span>
+<span class="line"><span style="color: #abb2bf">MD5 hex    = 2b48dce6e6db58d1c589d4c9f1048fba</span></span>
+<span class="line"><span style="color: #abb2bf">key18      = 2b48dce6e6db58d1c5</span></span>
+<span class="line"><span style="color: #abb2bf">AES key    = ASCII(&quot;2b48dce6e6db58d1&quot;)</span></span></code></pre></div></div></figure>
+
+<p>transformed 的来源是对小写字母表做循环移位，再对 0-based 奇数下标的字节与 r 做 XOR。随后计算 MD5，但 native 代码使用的是 MD5 的小写 hex 文本：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">MD5(raw transformed bytes)</span></span>
+<span class="line"><span style="color: #abb2bf">  -&gt; 32-char lowercase hex</span></span>
+<span class="line"><span style="color: #abb2bf">  -&gt; take first 18 chars as key18</span></span>
+<span class="line"><span style="color: #abb2bf">  -&gt; take first 16 ASCII bytes as AES key</span></span></code></pre></div></div></figure>
+
+<p>这处很容易写错。若直接使用 MD5 raw digest，长度虽然也是 16 字节，输出却会完全不同；若把前 16 个 hex 字符再做十六进制解码，得到的只有 8 字节，同样不符合 trace。</p>
+<p>另一份独立样本走的是 r&#x3D;70。它得到另一组 key18，仍按完全相同的方式取前 16 个 ASCII 字节完成加密。两份样本都能从 JSON 正向逐字符复现捕获到的 token，这比只对一个样本拟合公式可靠得多。</p>
+<h2 id="真正让事情突然简单的，是-token-中间那-24-个字符"><a href="#真正让事情突然简单的，是-token-中间那-24-个字符" class="headerlink" title="真正让事情突然简单的，是 token 中间那 24 个字符"></a>真正让事情突然简单的，是 token 中间那 24 个字符</h2><p>分析 key 派生时，我们原本默认“解密 token 必须先知道 r”。这也是为什么前面花了不少时间去追随机数、移位、XOR 和 MD5。</p>
+<p>直到把最终字符串按长度拆开，才发现这个前提是错的。</p>
+<p>当前版本的 token 格式是：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">token[0:10]   = prefix10</span></span>
+<span class="line"><span style="color: #abb2bf">token[10:34]  = Base64(key18)</span></span>
+<span class="line"><span style="color: #abb2bf">token[34:]    = Base64(ciphertext)</span></span></code></pre></div></div></figure>
+
+<p>key18 是 18 字节 ASCII 文本，标准 Base64 编码后恰好占 24 个字符。因此，解密一枚已有 token 的最短路径其实是：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">key18 = Base64Decode(token[10:34])</span></span>
+<span class="line"><span style="color: #abb2bf">aes_key = key18[0:16]</span></span>
+<span class="line"><span style="color: #abb2bf">ciphertext = Base64Decode(token[34:])</span></span>
+<span class="line"><span style="color: #abb2bf">plaintext = PKCS7Unpad(AES-128-ECB-Decrypt(ciphertext, aes_key))</span></span></code></pre></div></div></figure>
+
+<p>也就是说，实际解密不需要猜 r，不需要复现 arc4random，也不需要重走字母表移位、XOR 和 MD5。那些步骤对理解“key 如何生成”仍然重要，也是在已知 r 时正向构造 token 的一部分；但对“拿到 token 后如何解开 JSON”不是必要条件。</p>
+<p>前 10 个字符也不参与 AES。动态实现会从数字、大写字母、小写字母三类字符中生成这个前缀。它属于最终封装格式，而不是密钥材料。</p>
+<h2 id="把-A-P-E-写成等价逻辑"><a href="#把-A-P-E-写成等价逻辑" class="headerlink" title="把 A_P_E 写成等价逻辑"></a>把 A_P_E 写成等价逻辑</h2><p>省略内存管理、JNI 转换和错误分支后，当前执行路径可以整理成下面的等价伪代码：</p>
+<figure class="shiki python"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">def</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">build_token</span><span style="color: #ABB2BF">(</span><span style="color: #D19A66; font-style: italic">json_text</span><span style="color: #ABB2BF">, </span><span style="color: #D19A66; font-style: italic">r</span><span style="color: #ABB2BF">, </span><span style="color: #D19A66; font-style: italic">prefix10</span><span style="color: #ABB2BF">):</span></span>
+<span class="line"><span style="color: #ABB2BF">    shift </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> r </span><span style="color: #56B6C2">%</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">10</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">1</span></span>
+<span class="line"><span style="color: #ABB2BF">    rotated </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">rotate_lowercase_alphabet</span><span style="color: #ABB2BF">(shift)</span></span>
+<span class="line"><span style="color: #ABB2BF">    transformed </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">xor_odd_indexes</span><span style="color: #ABB2BF">(rotated, r)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #ABB2BF">    md5_hex </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">md5</span><span style="color: #ABB2BF">(transformed).</span><span style="color: #61AFEF">hexdigest</span><span style="color: #ABB2BF">()</span></span>
+<span class="line"><span style="color: #ABB2BF">    key18 </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> md5_hex[:</span><span style="color: #D19A66">18</span><span style="color: #ABB2BF">]</span></span>
+<span class="line"><span style="color: #ABB2BF">    aes_key </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> key18[:</span><span style="color: #D19A66">16</span><span style="color: #ABB2BF">].</span><span style="color: #61AFEF">encode</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&quot;ascii&quot;</span><span style="color: #ABB2BF">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #ABB2BF">    padded </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">pkcs7_pad</span><span style="color: #ABB2BF">(json_text.</span><span style="color: #61AFEF">encode</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&quot;utf-8&quot;</span><span style="color: #ABB2BF">), </span><span style="color: #D19A66">16</span><span style="color: #ABB2BF">)</span></span>
+<span class="line"><span style="color: #ABB2BF">    ciphertext </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">aes_128_ecb_encrypt</span><span style="color: #ABB2BF">(aes_key, padded)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">return</span><span style="color: #ABB2BF"> (</span></span>
+<span class="line"><span style="color: #ABB2BF">        prefix10</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">base64_encode</span><span style="color: #ABB2BF">(key18.</span><span style="color: #61AFEF">encode</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&quot;ascii&quot;</span><span style="color: #ABB2BF">))</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #56B6C2">+</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">base64_encode</span><span style="color: #ABB2BF">(ciphertext)</span></span>
+<span class="line"><span style="color: #ABB2BF">    )</span></span></code></pre></div></div></figure>
+
+<p>这里保留了调用方传入 JSON 的原始字节序列。即使两个 JSON 解析后的对象相同，只要字段顺序、空白或数字文本形式不同，密文都会改变。所谓“逐字符复现”，比较的是最终 token 的每个字符，而不只是解密后得到一个语义相同的对象。</p>
+<h2 id="Python-闭环不是只做了一次解密"><a href="#Python-闭环不是只做了一次解密" class="headerlink" title="Python 闭环不是只做了一次解密"></a>Python 闭环不是只做了一次解密</h2><p>为了把动态分析结果从“能讲通”推进到“能重复”，我们整理了脚本：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">shihuo_token_generate_verify.py</span></span></code></pre></div></div></figure>
+
+<p>脚本没有设计 CLI 参数。需要更换 JSON、r 或 10 字符前缀时，修改文件顶部配置，然后直接运行：</p>
+<figure class="shiki bash"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #61AFEF">python3</span><span style="color: #ABB2BF"> </span><span style="color: #98C379">shihuo_token_generate_verify.py</span></span></code></pre></div></div></figure>
+
+<p>它做了四类工作：复现已知样本、从 token 自身解密、检查 r 的候选空间，以及生成一枚新 token 再做回环。</p>
+<p>第一份真实样本唯一对应 r&#x3D;57。Python 从原始 JSON、r 和样本前缀正向计算后，最终 token 与捕获值逐字符相同；反向拆分 token，也能恢复相同 key18、112 字节密文和原始 JSON。</p>
+<p>上一份真实样本则唯一对应 r&#x3D;70。脚本不仅能解密它，也能从它的原始 JSON 再次正向得到完全相同的 token。换了一次 r、key、明文和密文后，算法仍然成立。</p>
+<p>我们还枚举了 r&#x3D;1..100：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">candidate r count = 100</span></span>
+<span class="line"><span style="color: #abb2bf">unique key18      = 100</span></span>
+<span class="line"><span style="color: #abb2bf">collision groups  = 0</span></span></code></pre></div></div></figure>
+
+<p>在当前这 100 个候选中，每个 r 都得到不同的 key18。两份真实样本分别只命中 r&#x3D;57 和 r&#x3D;70，没有出现一个 key18 对应多个 r 的情况。</p>
+<p>不过，仅让同一份 Python 代码“生成后再自己解密”，多少还有同实现自证的嫌疑。为此又随机生成了一份 r&#x3D;63 的新 token，只把最终 token 交给独立的 Node 验证器。Node 端没有读取 Python 的中间变量，而是自行完成分段、Base64 解码、PKCS#7 检查和 AES-ECB 解密，得到与 Python 输入完全相同的 JSON，并从 1..100 中唯一反推出 r&#x3D;63。</p>
+<p>这次交叉验证解决的是实现错误风险：即使 Python 的生成与解密恰好共享同一个 bug，独立 Node 实现仍需要对最终字节给出相同解释。</p>
+<h2 id="两个容易把日志带偏的小问题"><a href="#两个容易把日志带偏的小问题" class="headerlink" title="两个容易把日志带偏的小问题"></a>两个容易把日志带偏的小问题</h2><p>动态分析中还有两处小坑，虽然不属于算法本身，却很影响判断。</p>
+<p>一处是 C 字符串读取。第一版为了限制读取范围，使用了 <code>readUtf8String(maxLength)</code>。但这次 Frida 会按给定长度做严格 UTF-8 解码，JSON 和 Base64 末尾的 NUL 也落进了解码范围，于是分别在第 105 和第 152 字节报错。错误看上去发生在“明文”和“密文返回值”上，其实算法数据并没有丢：7 个分块和最终 token 都还完整。后来改成 <code>readCString(maxLength)</code>，既保留最大读取长度，又会在第一个 NUL 停下，这才符合 A_P_E 两端都是 C string 的情况。</p>
+<p>另一处是 hook 与 trace 边界。Stalker 没记录到某次写入，不代表该值没有来源；它可能在开始跟踪前就已经存在。key18 正是如此。最后采用“trace 负责指令路径，Frida capture 负责边界内存”的组合，才补上完整证据链。</p>
+<p>这也是为什么文章里不把某一次日志输出直接当作最终事实。长度、调用次数、内存字节和独立复算能够相互约束时，结论才比较稳。</p>
+<h2 id="目前能够下到哪一个结论"><a href="#目前能够下到哪一个结论" class="headerlink" title="目前能够下到哪一个结论"></a>目前能够下到哪一个结论</h2><p>现在已经可以确认：在所分析的当前应用版本、当前 Enviroment 执行路径中，JSON 会经过 PKCS#7 补齐，以 key18 前 16 个 ASCII 字节作为 AES-128-ECB key，加密结果再与 Base64(key18) 和 10 字符前缀拼装。这个算法与封装格式已经可以离线正向生成，也可以只依赖最终 token 离线反解。</p>
+<p>但“本地能够生成格式和算法一致的 token”，不等于“服务端一定接受任意自生成 token”。</p>
+<p>服务端还可能校验时间窗口、设备状态、账号上下文、请求参数之间的一致性、重放状态，或者存在这次 native 路径之外的关联字段。本文的 VerifiedFull 证明的是本地 AES 语义与动态输入输出完全一致；两个真实样本的逐字符复现证明的是本地封装公式成立；独立 Node 验证证明的是新样本可以被另一实现按同一格式解释。它们都不能替代真实请求上的服务端接受性实验。</p>
+<p>这次逆向最后留下的经验很朴素：方法名适合找入口，数据流才适合找算法。getToken 没有错，只是离答案太远。真正把问题拆开的，是 nativeInfo 下面那 7 次 A_e、边界处捕获到的 key18，以及最终字符串中那段一开始被我们当成普通 Base64 前缀的 24 个字符。</p>
+
+    
+  </article>
+
+  
+      
+    <div class="nexmoe-post-copyright">
+        <strong>本文作者：</strong>skuukzky<br>
+        <strong>本文链接：</strong><a href="https://lpy30m.github.io/skuukzky.github.io/2026/07/27/%E9%80%86%E5%90%91/%E8%AF%86%E8%B4%A7-Enviroment-Token%E9%80%86%E5%90%91%E5%AE%9E%E6%88%98/" title="https:&#x2F;&#x2F;lpy30m.github.io&#x2F;skuukzky.github.io&#x2F;2026&#x2F;07&#x2F;27&#x2F;%E9%80%86%E5%90%91&#x2F;%E8%AF%86%E8%B4%A7-Enviroment-Token%E9%80%86%E5%90%91%E5%AE%9E%E6%88%98&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;lpy30m.github.io&#x2F;skuukzky.github.io&#x2F;2026&#x2F;07&#x2F;27&#x2F;%E9%80%86%E5%90%91&#x2F;%E8%AF%86%E8%B4%A7-Enviroment-Token%E9%80%86%E5%90%91%E5%AE%9E%E6%88%98&#x2F;</a><br>
+        
+            <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+
+        
+    </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+        <a class="nexmoefont icon-tag-fill -none-link" href="/skuukzky.github.io/tags/AES/" rel="tag">AES</a> <a class="nexmoefont icon-tag-fill -none-link" href="/skuukzky.github.io/tags/ARM64/" rel="tag">ARM64</a> <a class="nexmoefont icon-tag-fill -none-link" href="/skuukzky.github.io/tags/Android/" rel="tag">Android</a> <a class="nexmoefont icon-tag-fill -none-link" href="/skuukzky.github.io/tags/Frida/" rel="tag">Frida</a>
+    
+</div>
+  
+  
+    <script async src="/skuukzky.github.io/js/copy-codeblock.js?v=1785120669513"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          <script src="https://giscus.app/client.js"
+    data-repo="lpy30m/skuukzky.github.io"
+    data-repo-id="R_kgDOMnIPZw"
+    data-category="General"
+    data-category-id="DIC_kwDOMnIPZ84Ch3f5"
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async>
+</script>
+
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%8E-getToken-%E7%9A%84%E7%A9%BA%E8%BD%AC%E5%8F%91%EF%BC%8C%E5%88%B0-A-e-%E7%9A%84%E4%B8%83%E4%B8%AA%E5%88%86%E5%9D%97%EF%BC%9A%E8%AF%86%E8%B4%A7-Enviroment-Token-%E9%80%86%E5%90%91%E5%A4%8D%E7%9B%98"><span class="toc-number">1.</span> <span class="toc-text">从 getToken 的空转发，到 A_e 的七个分块：识货 Enviroment Token 逆向复盘</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E-getToken-%E4%B8%80%E5%B1%82%E5%B1%82%E4%B8%8B%E6%B2%89"><span class="toc-number">1.1.</span> <span class="toc-text">从 getToken 一层层下沉</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#41-MB-trace-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%B2%A1%E6%9C%89%E7%BB%A7%E7%BB%AD%E7%A1%AC%E5%95%83"><span class="toc-number">1.2.</span> <span class="toc-text">41 MB trace 为什么没有继续硬啃</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#call-tree-%E9%87%8C%E5%87%BA%E7%8E%B0%E4%BA%86%E4%B8%83%E4%B8%AA%E7%9B%B8%E5%90%8C%E7%9A%84%E5%AD%A9%E5%AD%90"><span class="toc-number">1.3.</span> <span class="toc-text">call tree 里出现了七个相同的孩子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#trace-%E7%9C%8B%E4%B8%8D%E5%88%B0%E7%9A%84-key%EF%BC%8C%E7%94%A8-capture-%E8%A1%A5%E4%B8%8A"><span class="toc-number">1.4.</span> <span class="toc-text">trace 看不到的 key，用 capture 补上</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Unknown-%E4%B8%8D%E6%98%AF%E5%A4%B1%E8%B4%A5%EF%BC%8C%E5%AE%8C%E6%95%B4%E5%A4%8D%E7%AE%97%E6%89%8D%E6%98%AF%E7%AE%97%E6%B3%95%E8%AF%81%E6%8D%AE"><span class="toc-number">1.5.</span> <span class="toc-text">Unknown 不是失败，完整复算才是算法证据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#r-57-%E8%BF%99%E4%B8%80%E4%BB%BD%E6%A0%B7%E6%9C%AC%EF%BC%8Ckey-%E5%88%B0%E5%BA%95%E6%80%8E%E4%B9%88%E6%9D%A5"><span class="toc-number">1.6.</span> <span class="toc-text">r&#x3D;57 这一份样本，key 到底怎么来</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9C%9F%E6%AD%A3%E8%AE%A9%E4%BA%8B%E6%83%85%E7%AA%81%E7%84%B6%E7%AE%80%E5%8D%95%E7%9A%84%EF%BC%8C%E6%98%AF-token-%E4%B8%AD%E9%97%B4%E9%82%A3-24-%E4%B8%AA%E5%AD%97%E7%AC%A6"><span class="toc-number">1.7.</span> <span class="toc-text">真正让事情突然简单的，是 token 中间那 24 个字符</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8A%8A-A-P-E-%E5%86%99%E6%88%90%E7%AD%89%E4%BB%B7%E9%80%BB%E8%BE%91"><span class="toc-number">1.8.</span> <span class="toc-text">把 A_P_E 写成等价逻辑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Python-%E9%97%AD%E7%8E%AF%E4%B8%8D%E6%98%AF%E5%8F%AA%E5%81%9A%E4%BA%86%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%AF%86"><span class="toc-number">1.9.</span> <span class="toc-text">Python 闭环不是只做了一次解密</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%A4%E4%B8%AA%E5%AE%B9%E6%98%93%E6%8A%8A%E6%97%A5%E5%BF%97%E5%B8%A6%E5%81%8F%E7%9A%84%E5%B0%8F%E9%97%AE%E9%A2%98"><span class="toc-number">1.10.</span> <span class="toc-text">两个容易把日志带偏的小问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%89%8D%E8%83%BD%E5%A4%9F%E4%B8%8B%E5%88%B0%E5%93%AA%E4%B8%80%E4%B8%AA%E7%BB%93%E8%AE%BA"><span class="toc-number">1.11.</span> <span class="toc-text">目前能够下到哪一个结论</span></a></li></ol></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2058306854838448" crossorigin="anonymous"></script>
+</div><!-- hexo injector body_end start -->
+  <script>
+  const CODE_CONFIG = {
+    beautify: false,
+    highlightCopy: true,
+    highlightLang: false,
+    highlightHeightLimit: 360,
+    isHighlightShrink: false,
+    copy: {
+      success: 'Copy Success',
+      error: 'Copy Error',
+      noSupport: 'Browser Not Support',
+    }
+  };
+  console.log(
+    `%c hexo-shiki-plugin %c v1.0.27 %c https://github.com/nova1751/hexo-shiki-plugin`,
+    "color: #fff; background: #5f5f5f",
+    "color: #fff; background: #80c8f8",
+    ""
+  );
+  </script>
+  <!-- hexo injector body_end end --></body></html>

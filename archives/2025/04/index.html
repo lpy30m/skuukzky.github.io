@@ -18,15 +18,15 @@
 <link rel="stylesheet" href="/skuukzky.github.io/lib/mdui_043tiny/mdui.css">
 
 
-<link rel="stylesheet" href="/skuukzky.github.io/lib/iconfont/iconfont.css?v=1773987793554">
+<link rel="stylesheet" href="/skuukzky.github.io/lib/iconfont/iconfont.css?v=1785120669581">
 
-<link rel="stylesheet" href="/skuukzky.github.io/css/style.css?v=1773987793554">
+<link rel="stylesheet" href="/skuukzky.github.io/css/style.css?v=1785120669581">
 
 
 
 
     
-        <link rel="stylesheet" href="/skuukzky.github.io/custom.css?v=1773987793554">
+        <link rel="stylesheet" href="/skuukzky.github.io/custom.css?v=1785120669581">
     
 
 
@@ -36,7 +36,7 @@
 <script src="/skuukzky.github.io/lib/lax.min.js" async></script>
 
 
-<script async src="/skuukzky.github.io/js/app.js?v=1773987793555"></script>
+<script async src="/skuukzky.github.io/js/app.js?v=1785120669581"></script>
 
  
 
@@ -69,8 +69,8 @@
         </a>
     </div>
     <div class="nexmoe-count">
-        <div><span>文章</span>15</div>
-        <div><span>标签</span>0</div>
+        <div><span>文章</span>16</div>
+        <div><span>标签</span>4</div>
         <div><span>分类</span>2</div>
     </div>
     <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
@@ -192,7 +192,7 @@
 
         <li class="category-list-item">
           <a class="category-list-link" href="/skuukzky.github.io/categories/逆向/">逆向</a>
-          <span class="category-list-count">9</span>
+          <span class="category-list-count">10</span>
         </li>
 
         
@@ -212,6 +212,29 @@
     
         
         
+  <div class="nexmoe-widget-wrap">
+    <div id="randomtagcloud" class="nexmoe-widget tagcloud nexmoe-rainbow">
+      <a href="/skuukzky.github.io/tags/AES/" style="font-size: 10px;">AES</a> <a href="/skuukzky.github.io/tags/ARM64/" style="font-size: 10px;">ARM64</a> <a href="/skuukzky.github.io/tags/Android/" style="font-size: 10px;">Android</a> <a href="/skuukzky.github.io/tags/Frida/" style="font-size: 10px;">Frida</a>
+    </div>
+    
+      <script>
+        var maxTagcloud = parseInt(17);
+        var tags_length = parseInt(4);
+        var tags_arr = [];
+        for(var i = 0; i < tags_length; i++){
+          tags_arr.push(i);
+        }
+        tags_arr.sort(function (l, r) {
+          return Math.random() > 0.5 ? -1 : 1;
+        });
+        tags_arr = tags_arr.slice(0, maxTagcloud < tags_length ? tags_length - maxTagcloud : 0);
+        for(var tag_i = 0; tag_i < tags_arr.length; tag_i++){
+          document.getElementById("randomtagcloud").children[tags_arr[tag_i]].style.display = 'none';
+        }
+      </script>
+    
+  </div>
+
     
         
         
