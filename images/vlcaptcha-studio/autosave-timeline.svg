@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1520" height="950" viewBox="0 0 1520 950" role="img" aria-labelledby="title desc">
+<title id="title">自动保存：迟到回复不覆盖新编辑</title><desc id="desc">示例中 R1 保存 x 等于 110，用户继续编辑为 120。R1 的回复只更新 base，working 保持 120，随后生成 R2。</desc>
+<style>text{font-family:-apple-system,BlinkMacSystemFont,PingFang SC,Microsoft YaHei,Noto Sans CJK SC,sans-serif;fill:#172d42} .muted{fill:#506377} .label{font-size:24px;font-weight:650} .body{font-size:22px} .small{font-size:20px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536d86"/></marker></defs>
+<rect width="1520" height="950" rx="24" fill="#f4f7fb"/>
+<text x="60" y="65" font-size="36" font-weight="700" fill="#172d42" text-anchor="start">自动保存 · 迟到回复不覆盖新编辑</text>
+<text x="60" y="106" font-size="23" font-weight="400" fill="#506377" text-anchor="start">base 是已确认基线，working 是当前编辑，pending 是不可变请求。</text>
+<rect x="65" y="145" width="330" height="65" rx="16" fill="#eaf3ff" stroke="#b9d3f2" stroke-width="2"/>
+<text x="230" y="186" font-size="25" font-weight="650" fill="#172d42" text-anchor="middle">用户 / 工作副本</text>
+<path d="M230 212 V850" stroke="#b6c7d8" stroke-width="2" stroke-dasharray="7 8"/>
+<rect x="565" y="145" width="330" height="65" rx="16" fill="#eaf3ff" stroke="#b9d3f2" stroke-width="2"/>
+<text x="730" y="186" font-size="25" font-weight="650" fill="#172d42" text-anchor="middle">EditorSession</text>
+<path d="M730 212 V850" stroke="#b6c7d8" stroke-width="2" stroke-dasharray="7 8"/>
+<rect x="1095" y="145" width="330" height="65" rx="16" fill="#eaf3ff" stroke="#b9d3f2" stroke-width="2"/>
+<text x="1260" y="186" font-size="25" font-weight="650" fill="#172d42" text-anchor="middle">服务端 / SQLite</text>
+<path d="M1260 212 V850" stroke="#b6c7d8" stroke-width="2" stroke-dasharray="7 8"/>
+<rect x="60" y="235" width="1400" height="67" rx="16" fill="#fff" stroke="#cfdae6" stroke-width="2"/>
+<text x="88" y="278" font-size="24" font-weight="400" fill="#172d42" text-anchor="start">初始：base = 100，working = 100，pending = 空，服务端草稿版本 = 7</text>
+<path d="M 230 348 L 730 348" fill="none" stroke="#536d86" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="480" y="334" font-size="23" font-weight="400" fill="#172d42" text-anchor="middle">编辑 x = 110</text>
+<path d="M 730 404 L 1260 404" fill="none" stroke="#536d86" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="995" y="386" font-size="22" font-weight="400" fill="#172d42" text-anchor="middle">R1：x = 110 / expected_version = 7</text>
+<rect x="560" y="422" width="340" height="75" rx="16" fill="#fff7e8" stroke="#e3d0a5" stroke-width="2"/>
+<text x="585" y="455" font-size="23" font-weight="650" fill="#172d42" text-anchor="start">pending = R1</text>
+<text x="585" y="482" font-size="20" font-weight="400" fill="#172d42" text-anchor="start">请求内容冻结，等待回复</text>
+<path d="M 230 533 L 730 533" fill="none" stroke="#536d86" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="480" y="517" font-size="23" font-weight="400" fill="#172d42" text-anchor="middle">继续编辑 x = 120</text>
+<text x="750" y="567" font-size="22" font-weight="400" fill="#172d42" text-anchor="start">working = 120；pending 仍是 R1</text>
+<path d="M 1260 623 L 730 623" fill="none" stroke="#536d86" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="995" y="605" font-size="22" font-weight="400" fill="#172d42" text-anchor="middle">R1 回复：x = 110 / version = 8</text>
+<rect x="560" y="646" width="625" height="87" rx="16" fill="#ecf7ee" stroke="#bad7c1" stroke-width="2"/>
+<text x="585" y="681" font-size="23" font-weight="650" fill="#172d42" text-anchor="start">只更新 base = 110，清空 pending</text>
+<text x="585" y="715" font-size="23" font-weight="400" fill="#172d42" text-anchor="start">working 保持 120 → 仍有未保存修改</text>
+<path d="M 730 793 L 1260 793" fill="none" stroke="#536d86" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="995" y="776" font-size="22" font-weight="400" fill="#172d42" text-anchor="middle">R2：x = 120 / expected_version = 8</text>
+<text x="60" y="910" font-size="23" font-weight="400" fill="#506377" text-anchor="start">网络错误时保留 R1 原请求重试；服务端通过请求 ID 与摘要识别重复提交。</text>
+</svg>

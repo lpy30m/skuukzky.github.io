@@ -1,0 +1,843 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>从 vlcaptcha 到 VLCaptcha Studio：把视觉识别、Jev 判断和人工复核做成可靠的标注系统 - skuukzky</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<meta name="description" content="从候选 ID、Jev 协议和原图坐标，到不可变版本、自动保存、局部重识别及复核导出，完整拆解 VLCaptcha Studio 的设计与实现取舍。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从 vlcaptcha 到 VLCaptcha Studio：把视觉识别、Jev 判断和人工复核做成可靠的标注系统">
+<meta property="og:url" content="https://lpy30m.github.io/skuukzky.github.io/2026/09/28/vlcaptcha-studio-design/index.html">
+<meta property="og:site_name" content="skuukzky">
+<meta property="og:description" content="从候选 ID、Jev 协议和原图坐标，到不可变版本、自动保存、局部重识别及复核导出，完整拆解 VLCaptcha Studio 的设计与实现取舍。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lpy30m.github.io/skuukzky.github.io/images/vlcaptcha-studio/architecture.png">
+<meta property="og:image" content="https://lpy30m.github.io/skuukzky.github.io/images/vlcaptcha-studio/autosave-timeline.png">
+<meta property="article:published_time" content="2026-09-28T08:18:28.000Z">
+<meta property="article:modified_time" content="2026-09-28T08:18:28.000Z">
+<meta property="article:author" content="skuukzky">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Jev">
+<meta property="article:tag" content="标注工具">
+<meta property="article:tag" content="工程设计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lpy30m.github.io/skuukzky.github.io/images/vlcaptcha-studio/architecture.png">
+
+<link rel="stylesheet" href="/skuukzky.github.io/lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="/skuukzky.github.io/lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="/skuukzky.github.io/lib/iconfont/iconfont.css?v=1790584277158">
+
+<link rel="stylesheet" href="/skuukzky.github.io/css/style.css?v=1790584277158">
+
+
+
+
+    
+        <link rel="stylesheet" href="/skuukzky.github.io/custom.css?v=1790584277158">
+    
+
+
+
+<script src="/skuukzky.github.io/lib/mdui_043tiny/mdui.js" async></script>
+<script src="/skuukzky.github.io/lib/fancybox/fancybox.umd.js" async></script>
+<script src="/skuukzky.github.io/lib/lax.min.js" async></script>
+
+
+<script async src="/skuukzky.github.io/js/app.js?v=1790584277158"></script>
+
+ 
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4D4ZJ9G024"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag("js", new Date());
+
+  gtag("config", "G-4D4ZJ9G024");
+</script>
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-shiki-plugin@latest/lib/codeblock.css">
+<style>:root{--hl-color:#abb2bf;--hl-bg:#282c34;--hltools-bg:#21252b;--hltools-color:#bbbbbc;--hlnumber-bg:#282c34;--hlnumber-color:#495162;--hlscrollbar-bg:#373c47;--hlexpand-bg:linear-gradient(180deg,rgba(40,44,52,0.1),rgba(40,44,52,0.9))}</style>
+    <style>
+    .code-expand-btn:not(.expand-done) ~ div.codeblock,
+    .code-expand-btn:not(.expand-done) ~ * div.codeblock {
+      overflow: hidden;
+      height: 360px;
+    }
+    </style>
+  <!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(https://image.3001.net/images/20250307/1741314829_67ca5b0d4957ea5241ba3.png)"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="/skuukzky.github.io/" title="skuukzky"><img src="https://image.3001.net/images/20250307/1741314773_67ca5ad59320935fabc37.png" alt="skuukzky"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/skuukzky.github.io/" title="skuukzky">
+            <img src="https://image.3001.net/images/20250307/1741314773_67ca5ad59320935fabc37.png" alt="skuukzky" alt="skuukzky">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>文章</span>18</div>
+        <div><span>标签</span>9</div>
+        <div><span>分类</span>3</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/" title="回到首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                回到首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/archive.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/PY.html" title="我的朋友">
+            <i class="mdui-list-item-icon nexmoefont icon-unorderedlist"></i>
+            <div class="mdui-list-item-content">
+                我的朋友
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/donate.html" title="给我赞助">
+            <i class="mdui-list-item-icon nexmoefont icon-coffee"></i>
+            <div class="mdui-list-item-content">
+                给我赞助
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/skuukzky.github.io/about.html" title="关于博主">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于博主
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+         
+            <form id="search_form" action_e="https://cn.bing.com/search?q=site:nexmoe.com" onsubmit="return search();">
+                <label><input id="search_value" name="q" type="search" placeholder="搜索"></label>
+            </form>
+         
+    </div>
+</div>
+
+
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="https://space.bilibili.com/603975910"
+			target="_blank"
+			mdui-tooltip="{content: '哔哩哔哩'}"
+			style="
+				color: rgb(231, 106, 141);
+				background-color: rgba(231, 106, 141, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/lpy30m/"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://nexmoe.com/atom.xml"
+			target="_blank"
+			mdui-tooltip="{content: 'RSS'}"
+			style="
+				color: rgb(247, 132, 34);
+				background-color: rgba(247, 132, 34, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-rss"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章分类</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/skuukzky.github.io/categories/生活/">生活</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/skuukzky.github.io/categories/逆向/">逆向</a>
+          <span class="category-list-count">10</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/skuukzky.github.io/categories/验证码识别/">验证码识别</a>
+          <span class="category-list-count">5</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <div id="randomtagcloud" class="nexmoe-widget tagcloud nexmoe-rainbow">
+      <a href="/skuukzky.github.io/tags/AES/" style="font-size: 10px;">AES</a> <a href="/skuukzky.github.io/tags/AI/" style="font-size: 10px;">AI</a> <a href="/skuukzky.github.io/tags/ARM64/" style="font-size: 10px;">ARM64</a> <a href="/skuukzky.github.io/tags/Android/" style="font-size: 10px;">Android</a> <a href="/skuukzky.github.io/tags/Frida/" style="font-size: 10px;">Frida</a> <a href="/skuukzky.github.io/tags/Jev/" style="font-size: 10px;">Jev</a> <a href="/skuukzky.github.io/tags/%E5%B7%A5%E7%A8%8B%E8%AE%BE%E8%AE%A1/" style="font-size: 10px;">工程设计</a> <a href="/skuukzky.github.io/tags/%E6%A0%87%E6%B3%A8%E5%B7%A5%E5%85%B7/" style="font-size: 10px;">标注工具</a> <a href="/skuukzky.github.io/tags/%E7%94%9F%E6%B4%BB/" style="font-size: 10px;">生活</a>
+    </div>
+    
+      <script>
+        var maxTagcloud = parseInt(17);
+        var tags_length = parseInt(9);
+        var tags_arr = [];
+        for(var i = 0; i < tags_length; i++){
+          tags_arr.push(i);
+        }
+        tags_arr.sort(function (l, r) {
+          return Math.random() > 0.5 ? -1 : 1;
+        });
+        tags_arr = tags_arr.slice(0, maxTagcloud < tags_length ? tags_length - maxTagcloud : 0);
+        for(var tag_i = 0; tag_i < tags_arr.length; tag_i++){
+          document.getElementById("randomtagcloud").children[tags_arr[tag_i]].style.display = 'none';
+        }
+      </script>
+    
+  </div>
+
+    
+        
+        
+        
+        
+   
+    <div class="nexmoe-copyright">
+        &copy; 2026 skuukzky
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        <br><a target="_blank" href="https://beian.miit.gov.cn/"></a>
+
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover"> 
+            <img src="https://image.3001.net/images/20250307/1741314829_67ca5b0d4957ea5241ba3.png" alt="从 vlcaptcha 到 VLCaptcha Studio：把视觉识别、Jev 判断和人工复核做成可靠的标注系统" loading="lazy">
+            <h1>从 vlcaptcha 到 VLCaptcha Studio：把视觉识别、Jev 判断和人工复核做成可靠的标注系统</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2026年09月28日</a>
+        
+            <a class="nexmoefont icon-appstore-fill -link" href="/skuukzky.github.io/categories/%E9%AA%8C%E8%AF%81%E7%A0%81%E8%AF%86%E5%88%AB/">验证码识别</a>
+        
+        
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <p>看到 <code>vlcaptcha</code> 时，我首先想到的应用场景，是把它已有的图像识别能力接进一个 Web 标注工作台：模型先找出候选对象，再按题意选择，人可以直接在图片上修正，最后导出数据集。</p>
+<p>这个想法很容易画成一条流程线，但真正实现时，难点很快转移到了模型调用之外。</p>
+<p>假设模型把一个物体认错了，我已经手动改好了标签和点位，这时候重新识别，修改应该怎样保留？如果一个请求在十秒之后才返回，而这十秒里我已经切换图片、修改题目，甚至重新打开了浏览器，系统还能不能判断这份结果应该放在哪里？如果页面显示“保存成功”，它指的是模型草稿、浏览器缓存、数据库记录，还是一份已经确认可以导出的标注？</p>
+<p>VLCaptcha Studio 的设计就是围绕这些具体问题展开的。最终形成的核心流程是：<strong>视觉模型生成候选，Jev 根据题意选择候选 ID，程序从对应版本中读取坐标，用户编辑并明确确认。</strong></p>
+<p>这篇文章从最初的分工讲起，再深入候选协议、数据库版本、坐标变换、自动保存、局部识别、后台任务和评测。文中的实现细节对应 0.2.0 版本；简化代码会明确标注，后续设想也会与当前能力分开。</p>
+<span id="more"></span>
+
+<h2 id="一、从两阶段识别，走向可编辑的工作流"><a href="#一、从两阶段识别，走向可编辑的工作流" class="headerlink" title="一、从两阶段识别，走向可编辑的工作流"></a>一、从两阶段识别，走向可编辑的工作流</h2><p><code>vlcaptcha</code> 提供了图片加载、视觉模型适配、检测提示词、结果解析和多种题型处理逻辑。我参考的是它的两阶段点选方式：先检测图片中的对象，再根据题目选出需要点击的对象。</p>
+<p>第二阶段天然存在一个适合人工介入的接口。第一阶段既然已经得到对象列表，就可以把列表和图片一起展示出来，让用户检查类别与位置。候选可以单独修改、单独保存，选择逻辑也可以在保留候选的前提下重新执行。</p>
+<p>最初我明确希望让 TypeSafe 的 Jev 参与判断。项目采用的 Jev 接口处理文本和结构化状态，因此不能直接把“看图定位”这一职责交给它。图片仍然需要由视觉模型处理，Jev 则回答一个更有边界的问题：根据题目和候选描述，应该选中哪些对象，以及按什么顺序选中。</p>
+<p>这里要接受一个事实：两个模型串起来，并不会自动消除第一个模型的错误。视觉阶段如果把剃须刀描述成高脚杯，Jev 可能非常一致地选中这个“高脚杯”。从它收到的信息看，判断甚至完全合理。</p>
+<p>因此，工具必须把原图保留在复核的中心位置。人工需要同时检查三件事：候选描述是否符合图片、选择是否符合题目、最终落点是否合适。它们分别对应视觉语义、决策语义和几何精度，不能用一个“接口成功”状态代替。</p>
+<p>我把第一版范围收敛到点选题的三种选择方式：单选、全部匹配、按指定顺序点选。它们可以共用同一套候选结构和画布编辑器，适合先验证完整工作流。滑块、旋转、轨迹和文字题则需要各自的几何结构与编辑控件，暂时留在后续范围。</p>
+<h2 id="二、先确定系统必须始终满足的规则"><a href="#二、先确定系统必须始终满足的规则" class="headerlink" title="二、先确定系统必须始终满足的规则"></a>二、先确定系统必须始终满足的规则</h2><p>写页面之前，我先明确了几条会影响所有模块的规则。它们决定按钮意味着什么、接口何时拒绝请求，以及哪些数据可以被导出。</p>
+<table>
+<thead>
+<tr>
+<th>规则</th>
+<th>对实现的直接要求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>模型完成任务，不等于人工认可结果</td>
+<td>模型运行、应用建议、人工确认是三个独立动作</td>
+</tr>
+<tr>
+<td>模型重跑不能自动覆盖人工点位</td>
+<td>候选、判断记录、人工草稿分别保存</td>
+</tr>
+<tr>
+<td>判断必须能定位到它实际使用的输入</td>
+<td>每份判断引用候选集合 ID 和题目版本</td>
+</tr>
+<tr>
+<td>画布缩放不能改变标注的含义</td>
+<td>持久化统一采用原图像素坐标</td>
+</tr>
+<tr>
+<td>同一保存请求重试不能产生额外修订</td>
+<td>请求 ID、内容摘要和回复需要持久化</td>
+</tr>
+<tr>
+<td>旧页面不能直接覆盖新版本</td>
+<td>保存、应用和确认都校验预期版本</td>
+</tr>
+<tr>
+<td>导出必须能解释这份数据为何有效</td>
+<td>导出读取人工确认快照，并检查当前题目及复核状态</td>
+</tr>
+</tbody></table>
+<p>这些规则也帮助区分三个界面动作。</p>
+<p>“生成建议”只是获得一份可以检查的模型结果。“应用到标注”表示用户决定把结果放进当前草稿，草稿仍然可以修改。“确认”表示用户认可当前这一版内容，系统据此创建一个后续不会被编辑覆盖的快照。</p>
+<p>如果把三个动作合成一个“识别并保存”，用户将很难知道数据库里究竟存的是哪种结果，也很难在模型出错后恢复正确版本。把它们拆开会增加一些操作和状态，但能够明确保留每一步的意义。</p>
+<p>还有一个容易忽略的取舍：模型调用可以耗时很久，用户的编辑却必须立即反馈。因此，前端显示中的工作副本、服务端已保存的草稿，以及正在等待回复的请求，本来就可能短暂不同。后面的自动保存设计，需要正面处理这种不同步。</p>
+<h2 id="三、整体结构：让模型适配与编辑流程分别演进"><a href="#三、整体结构：让模型适配与编辑流程分别演进" class="headerlink" title="三、整体结构：让模型适配与编辑流程分别演进"></a>三、整体结构：让模型适配与编辑流程分别演进</h2><p>当前工程使用 React、TypeScript 和 React Konva 构建前端，FastAPI 提供接口，SQLite 保存结构化状态，本地文件目录保存规范化后的图片，IndexedDB 保存浏览器中的未同步编辑副本。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://lpy30m.github.io/skuukzky.github.io/images/vlcaptcha-studio/architecture.png" alt="VLCaptcha Studio 的职责分层与数据流" data-caption="VLCaptcha Studio 的职责分层与数据流" loading="lazy"></p>
+<p>前端的主要职责是展示原图、编辑候选和点位、维护当前工作副本，以及将用户操作提交给后端。模型密钥和实际模型请求由 Python 服务处理。</p>
+<p>后端进一步分成几类模块：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">studio/</span></span>
+<span class="line"><span style="color: #abb2bf">  _vendor/vlcaptcha/   固定提交的上游库代码</span></span>
+<span class="line"><span style="color: #abb2bf">  providers.py        视觉模型与 Jev 的请求构造、解析和校验</span></span>
+<span class="line"><span style="color: #abb2bf">  chat_decision.py    通用兼容接口的候选选择适配</span></span>
+<span class="line"><span style="color: #abb2bf">  pipeline.py         单张及批量模型任务</span></span>
+<span class="line"><span style="color: #abb2bf">  regions.py          局部识别、预览和应用</span></span>
+<span class="line"><span style="color: #abb2bf">  models.py           数据类型与几何校验</span></span>
+<span class="line"><span style="color: #abb2bf">  editor.py           编辑保存事务与幂等记录</span></span>
+<span class="line"><span style="color: #abb2bf">  review.py           复核状态和操作</span></span>
+<span class="line"><span style="color: #abb2bf">  review_rules.py     待复核排序规则</span></span>
+<span class="line"><span style="color: #abb2bf">  datasets.py         数据集与导入</span></span>
+<span class="line"><span style="color: #abb2bf">  db.py               数据库、版本及查询</span></span>
+<span class="line"><span style="color: #abb2bf">  api.py              上传、应用、确认和导出接口</span></span>
+<span class="line"><span style="color: #abb2bf"></span></span>
+<span class="line"><span style="color: #abb2bf">frontend/src/</span></span>
+<span class="line"><span style="color: #abb2bf">  Editor.tsx          画布交互</span></span>
+<span class="line"><span style="color: #abb2bf">  editorSession.ts    base / working / pending 的协调</span></span>
+<span class="line"><span style="color: #abb2bf">  recovery.ts         IndexedDB 恢复副本与工作位置</span></span>
+<span class="line"><span style="color: #abb2bf">  RegionPanel.tsx     局部识别交互</span></span></code></pre></div></div></figure>
+
+<p>这里最有用的一条边界，是模型适配层最终只向业务层交付受约束的数据。它可以调用 Jev，也可以调用兼容的聊天接口，但不能直接操作人工草稿，更不能直接创建确认记录。</p>
+<p>第一版使用 SQLite 和进程内线程池，主要是为了降低本地运行的配置成本。它适合当前单用户工作台，但不能据此推断系统已经具备多节点调度、租约恢复或多人协同能力。以后需要扩展部署方式时，任务执行和存储层都要重新评估。</p>
+<h2 id="四、候选协议：把“模型描述”变成可检查的数据"><a href="#四、候选协议：把“模型描述”变成可检查的数据" class="headerlink" title="四、候选协议：把“模型描述”变成可检查的数据"></a>四、候选协议：把“模型描述”变成可检查的数据</h2><h3 id="4-1-候选必须有身份，也必须有几何约定"><a href="#4-1-候选必须有身份，也必须有几何约定" class="headerlink" title="4.1 候选必须有身份，也必须有几何约定"></a>4.1 候选必须有身份，也必须有几何约定</h3><p>候选是视觉阶段、判断阶段和编辑器之间共同使用的数据。实际核心字段如下：</p>
+<figure class="shiki json"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #ABB2BF">{</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;id&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;c1&quot;</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;label&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;红色苹果&quot;</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;center&quot;</span><span style="color: #ABB2BF">: [</span><span style="color: #D19A66">120</span><span style="color: #ABB2BF">, </span><span style="color: #D19A66">80</span><span style="color: #ABB2BF">],</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;bbox&quot;</span><span style="color: #ABB2BF">: [</span><span style="color: #D19A66">95</span><span style="color: #ABB2BF">, </span><span style="color: #D19A66">55</span><span style="color: #ABB2BF">, </span><span style="color: #D19A66">145</span><span style="color: #ABB2BF">, </span><span style="color: #D19A66">105</span><span style="color: #ABB2BF">]</span></span>
+<span class="line"><span style="color: #ABB2BF">}</span></span></code></pre></div></div></figure>
+
+<p><code>center</code> 是原图像素坐标，<code>bbox</code> 使用左上角、右下角的顺序。边框可以为空，中心和标签则是判断阶段的基本输入。</p>
+<p>视觉模型返回的候选会先经过解析、归一化坐标转换和结构检查，再进入数据库。检查包括 ID 唯一性、候选数量、数值有限性、中心是否越界、边框宽高是否为正等。当前每张图片最多保留 64 个候选，超出范围需要调整输入或人工处理。</p>
+<p>但编辑中的候选允许暂时不完整。例如用户刚补了一个点，还没有输入标签，自动保存应该能保存这一步。进入模型判断和人工确认前，再执行相应的严格检查。</p>
+<p>这实际上是两套有不同目的的校验：草稿校验保护数据结构，提交校验保护业务语义。若把所有最终约束都提前放进自动保存，用户编辑到一半就会不断遇到保存失败。</p>
+<h3 id="4-2-ID-只在具体候选版本中有意义"><a href="#4-2-ID-只在具体候选版本中有意义" class="headerlink" title="4.2 ID 只在具体候选版本中有意义"></a>4.2 ID 只在具体候选版本中有意义</h3><p><code>c1</code> 并不是跨所有检测永远指向同一物体的全局 ID。新的一次视觉检测也可能生成 <code>c1</code>，因此引用候选时必须同时记录 <code>candidate_set_id</code>。</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">候选集合 A / c1 = 红色苹果</span></span>
+<span class="line"><span style="color: #abb2bf">候选集合 B / c1 = 黄色香蕉</span></span>
+<span class="line"><span style="color: #abb2bf"></span></span>
+<span class="line"><span style="color: #abb2bf">可靠引用 = candidate_set_id + candidate_id</span></span></code></pre></div></div></figure>
+
+<p>编辑器里的点还可以保存 <code>prediction_id</code>，说明这个点最初是从哪次判断应用过来的。后端会检查：候选集合是否属于当前任务，集合里是否有这个候选，判断记录是否引用了相同的候选集合。</p>
+<p>这些引用主要说明数据来源，不意味着人工修改后的坐标仍然等于模型坐标。用户可以保留来源记录，再把落点移到正确位置；最终可信的坐标来自那一版人工确认快照。</p>
+<h3 id="4-3-让判断模型选择-ID，避免重新生成坐标"><a href="#4-3-让判断模型选择-ID，避免重新生成坐标" class="headerlink" title="4.3 让判断模型选择 ID，避免重新生成坐标"></a>4.3 让判断模型选择 ID，避免重新生成坐标</h3><p>假设题目是“依次点击苹果、香蕉”，视觉阶段已经提供了两个候选。判断适配层最终交付给业务的结果可以简化为：</p>
+<figure class="shiki json"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #ABB2BF">{</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;selected_ids&quot;</span><span style="color: #ABB2BF">: [</span><span style="color: #98C379">&quot;c1&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;c2&quot;</span><span style="color: #ABB2BF">],</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;warnings&quot;</span><span style="color: #ABB2BF">: [],</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;applicable&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">true</span></span>
+<span class="line"><span style="color: #ABB2BF">}</span></span></code></pre></div></div></figure>
+
+<p>这里展示的是程序内部结果，不是完整的 Jev 原始响应。应用建议时，程序按选中顺序从这份判断引用的候选集合中读取标签和中心坐标。</p>
+<p>这样可以把“选错对象”和“坐标来自错误版本”分开检查。未知 ID、重复分配和缺失位置都能在程序里发现，而无需再次询问模型。</p>
+<h2 id="五、Jev-的三种请求如何对应点选任务"><a href="#五、Jev-的三种请求如何对应点选任务" class="headerlink" title="五、Jev 的三种请求如何对应点选任务"></a>五、Jev 的三种请求如何对应点选任务</h2><h3 id="5-1-单选：显式保留“无匹配”"><a href="#5-1-单选：显式保留“无匹配”" class="headerlink" title="5.1 单选：显式保留“无匹配”"></a>5.1 单选：显式保留“无匹配”</h3><p>单选构造一个 <code>Choice</code> 问题。候选 ID 作为选项键，候选标签、中心和边框作为选项信息，同时加入 <code>__none__</code>，表示没有匹配对象或信息不足。</p>
+<p>下面是简化后的请求片段，实际请求还包含题目状态、图片尺寸和规则说明：</p>
+<figure class="shiki json"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #ABB2BF">{</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;questions&quot;</span><span style="color: #ABB2BF">: {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;target&quot;</span><span style="color: #ABB2BF">: {</span></span>
+<span class="line"><span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;choice&quot;</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;criteria&quot;</span><span style="color: #ABB2BF">: {</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #E06C75">&quot;c1&quot;</span><span style="color: #ABB2BF">: {</span><span style="color: #E06C75">&quot;label&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;红色苹果&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">&quot;center_px&quot;</span><span style="color: #ABB2BF">: [</span><span style="color: #D19A66">120</span><span style="color: #ABB2BF">, </span><span style="color: #D19A66">80</span><span style="color: #ABB2BF">]},</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #E06C75">&quot;c2&quot;</span><span style="color: #ABB2BF">: {</span><span style="color: #E06C75">&quot;label&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;黄色香蕉&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">&quot;center_px&quot;</span><span style="color: #ABB2BF">: [</span><span style="color: #D19A66">220</span><span style="color: #ABB2BF">, </span><span style="color: #D19A66">100</span><span style="color: #ABB2BF">]},</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #E06C75">&quot;__none__&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;没有匹配对象，或无法可靠选择&quot;</span></span>
+<span class="line"><span style="color: #ABB2BF">      },</span></span>
+<span class="line"><span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;instructions&quot;</span><span style="color: #ABB2BF">: {</span><span style="color: #E06C75">&quot;question&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;点击苹果&quot;</span><span style="color: #ABB2BF">}</span></span>
+<span class="line"><span style="color: #ABB2BF">    }</span></span>
+<span class="line"><span style="color: #ABB2BF">  }</span></span>
+<span class="line"><span style="color: #ABB2BF">}</span></span></code></pre></div></div></figure>
+
+<p>没有“无匹配”选项时，模型即使面对一组全错的候选，也可能只能选出其中相对接近的一个。保留这个出口，能把候选不足的情况交给复核流程。</p>
+<p>解析时也不能只拿 <code>choice</code> 字段。当前代码还检查概率键是否覆盖全部选项、每个值是否落在 0 到 1 之间、概率和是否在容差内，以及选中项是否与最大概率一致。这些检查保证响应内部自洽，但不能证明图片里的语义正确。</p>
+<h3 id="5-2-多选：逐个判断，再统一生成建议"><a href="#5-2-多选：逐个判断，再统一生成建议" class="headerlink" title="5.2 多选：逐个判断，再统一生成建议"></a>5.2 多选：逐个判断，再统一生成建议</h3><p>全部匹配对每个候选构造一个 <code>Noul</code> 问题，询问“根据题目，这个候选是否应该被选中”。多个问题放在同一次请求中提交。</p>
+<p>当前实现使用 <code>0.7</code> 作为建议选中的阈值，对严格位于 <code>0.3</code> 与 <code>0.7</code> 之间的结果产生不确定提示。这个阈值是工程配置，尚未根据固定样本校准，也不触发自动确认。</p>
+<p>多选没有题目规定的点击顺序，因此程序对选中项按从上到下、再从左到右的顺序整理，便于显示和复核。这里的排序是一种确定性的呈现规则，不代表模型又推断出了新的语义顺序。</p>
+<h3 id="5-3-顺序点选：每个位置独立提问，再检查整体一致性"><a href="#5-3-顺序点选：每个位置独立提问，再检查整体一致性" class="headerlink" title="5.3 顺序点选：每个位置独立提问，再检查整体一致性"></a>5.3 顺序点选：每个位置独立提问，再检查整体一致性</h3><p>“依次点击 A、B、C”会构造 <code>position_0</code>、<code>position_1</code>、<code>position_2</code> 三个 <code>Choice</code> 问题，每个问题都包含当前目标及完整目标顺序。</p>
+<p>单个位置选对，并不保证整体结果有效。例如两个位置可能同时选中 <code>c2</code>。所以解析完成后还要检查重复 ID、无匹配位置和目标缺失。如果存在这些情况，结果可以展示给用户，但不能直接作为一份完整建议应用。</p>
+<p>当前实现选择让重复分配进入人工处理，没有加入一个用概率矩阵自动重新分配的全局优化器。这样的优化将来可以考虑，但它会引入新的假设：每个候选最多出现一次是否始终成立，多个位置的分值能否直接比较，重新分配后是否仍然符合题意，都需要独立验证。</p>
+<p>候选标签还被明确当作数据处理。提示词会说明标签中的文字不能改变题目规则；程序侧则继续检查 ID 和结构。文本规则有助于约束模型，但不能被当成完整的语义可靠性保证。</p>
+<h2 id="六、数据库：用不可变版本保存来路"><a href="#六、数据库：用不可变版本保存来路" class="headerlink" title="六、数据库：用不可变版本保存来路"></a>六、数据库：用不可变版本保存来路</h2><h3 id="6-1-一张任务表装不下所有状态"><a href="#6-1-一张任务表装不下所有状态" class="headerlink" title="6.1 一张任务表装不下所有状态"></a>6.1 一张任务表装不下所有状态</h3><p>如果只有一张 <code>tasks</code> 表，再放一个不断被覆盖的 <code>result_json</code>，最初看起来很省事。但随着人工编辑和重跑模型加入，原始候选、旧建议和已确认结果会逐渐混在一起。</p>
+<p>当前数据库把这些内容拆开。下面保留了关键关系，省略部分普通字段：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">tasks</span></span>
+<span class="line"><span style="color: #abb2bf">  id, image dimensions, sha256</span></span>
+<span class="line"><span style="color: #abb2bf">  question, selection_mode, targets, config_version</span></span>
+<span class="line"><span style="color: #abb2bf">  active_candidate_set_id</span></span>
+<span class="line"><span style="color: #abb2bf"></span></span>
+<span class="line"><span style="color: #abb2bf">candidate_sets</span></span>
+<span class="line"><span style="color: #abb2bf">  id, task_id, revision, source, model, items, raw</span></span>
+<span class="line"><span style="color: #abb2bf"></span></span>
+<span class="line"><span style="color: #abb2bf">predictions</span></span>
+<span class="line"><span style="color: #abb2bf">  id, task_id, candidate_set_id, config_version</span></span>
+<span class="line"><span style="color: #abb2bf">  selected_ids, selections, warnings, applicable, raw, usage</span></span>
+<span class="line"><span style="color: #abb2bf"></span></span>
+<span class="line"><span style="color: #abb2bf">drafts</span></span>
+<span class="line"><span style="color: #abb2bf">  task_id, version, points</span></span>
+<span class="line"><span style="color: #abb2bf"></span></span>
+<span class="line"><span style="color: #abb2bf">annotations</span></span>
+<span class="line"><span style="color: #abb2bf">  id, task_id, revision, config_version, draft_version</span></span>
+<span class="line"><span style="color: #abb2bf">  question, selection_mode, targets, points</span></span>
+<span class="line"><span style="color: #abb2bf"></span></span>
+<span class="line"><span style="color: #abb2bf">editor_saves</span></span>
+<span class="line"><span style="color: #abb2bf">  request_id, task_id, request_hash, reply</span></span>
+<span class="line"><span style="color: #abb2bf"></span></span>
+<span class="line"><span style="color: #abb2bf">task_review / review_events</span></span>
+<span class="line"><span style="color: #abb2bf">  当前复核状态 / 复核操作历史</span></span></code></pre></div></div></figure>
+
+<p>候选更新创建新集合，判断更新创建新记录，人工确认创建新快照。<code>tasks.active_candidate_set_id</code> 表示当前工作使用哪份候选，而历史判断继续引用原来的集合。</p>
+<p>这是一种围绕关键产物的快照设计。它没有把用户每次鼠标移动都保存成事件流，也不等同于完整的事件溯源系统。当前会话内的撤销由前端管理，已确认历史则由后端持久化，两者的保留范围不同。</p>
+<h3 id="6-2-“建议是否过期”是依赖关系检查"><a href="#6-2-“建议是否过期”是依赖关系检查" class="headerlink" title="6.2 “建议是否过期”是依赖关系检查"></a>6.2 “建议是否过期”是依赖关系检查</h3><p>一份判断能否应用，需要至少满足：</p>
+<figure class="shiki python"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #7F848E; font-style: italic"># 语义化简写：实际检查发生在写入事务内</span></span>
+<span class="line"><span style="color: #ABB2BF">prediction.candidate_set_id </span><span style="color: #56B6C2">==</span><span style="color: #ABB2BF"> task.active_candidate_set_id</span></span>
+<span class="line"><span style="color: #ABB2BF">prediction.config_version </span><span style="color: #56B6C2">==</span><span style="color: #ABB2BF"> task.config_version</span></span>
+<span class="line"><span style="color: #ABB2BF">request.expected_draft_version </span><span style="color: #56B6C2">==</span><span style="color: #ABB2BF"> draft.version</span></span>
+<span class="line"><span style="color: #ABB2BF">prediction.applicable </span><span style="color: #C678DD">is</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">True</span></span></code></pre></div></div></figure>
+
+<p>前两个条件检查模型实际看到的输入是否仍然有效，第三个条件检查它准备覆盖的人工草稿是否已经变化，第四个条件检查选择结果是否完整可用。</p>
+<p>举一个具体过程：</p>
+<figure class="shiki text"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #abb2bf">t0  候选集合 A，题目版本 3，开始请求 P</span></span>
+<span class="line"><span style="color: #abb2bf">t1  用户把候选标签修正，生成候选集合 B</span></span>
+<span class="line"><span style="color: #abb2bf">t2  请求 P 完成，它仍然引用 A / 题目版本 3</span></span>
+<span class="line"><span style="color: #abb2bf">t3  用户尝试应用 P</span></span>
+<span class="line"><span style="color: #abb2bf">    → 当前候选已经是 B，拒绝应用，提示重新判断</span></span></code></pre></div></div></figure>
+
+<p>过期不代表结果必须从历史里消失。它仍然可以用于了解当时的判断，只是不能被误当成当前输入的最新答案。</p>
+<h3 id="6-3-在事务里检查，避免检查和写入之间出现空隙"><a href="#6-3-在事务里检查，避免检查和写入之间出现空隙" class="headerlink" title="6.3 在事务里检查，避免检查和写入之间出现空隙"></a>6.3 在事务里检查，避免检查和写入之间出现空隙</h3><p>版本检查如果发生在事务外，检查完成后到实际写入前，其他请求仍可能改变数据。当前写连接使用 <code>BEGIN IMMEDIATE</code>，把读取预期版本、检查引用和提交结果放在同一个写事务中。</p>
+<p>SQLite 开启 WAL，并为连接设置等待超时，这适合当前本地服务的读写模式。它提供事务一致性，但并不允许任意多个写事务同时提交。后续如果增加多人协作或长时间批量写入，需要重新衡量数据库与事务边界，不能把本地使用的表现直接外推。</p>
+<h2 id="七、坐标体系：把每一步转换写清楚"><a href="#七、坐标体系：把每一步转换写清楚" class="headerlink" title="七、坐标体系：把每一步转换写清楚"></a>七、坐标体系：把每一步转换写清楚</h2><h3 id="7-1-区分工作图片、模型输入和画布显示"><a href="#7-1-区分工作图片、模型输入和画布显示" class="headerlink" title="7.1 区分工作图片、模型输入和画布显示"></a>7.1 区分工作图片、模型输入和画布显示</h3><p>导入图片后，工作台按显示方向规范化并保存为 PNG。后续标注所说的“原图”，对应这份规范化后的工作图片。其尺寸和 SHA-256 一起进入任务记录，导出也带上这份图片。</p>
+<p>视觉模型可能看到经过缩放的输入；前端画布还可能显示为 50%、150% 或更大的倍率。所有这些显示、传输尺寸都不能改变数据库坐标的含义。</p>
+<p>目前视觉适配约定模型输出 <code>0–1000</code> 的归一化坐标，适配层负责转换为工作图片的像素坐标。中心点采用：</p>
+<figure class="shiki python"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #ABB2BF">x </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">round</span><span style="color: #ABB2BF">(normalized_x </span><span style="color: #56B6C2">/</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">1000</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">*</span><span style="color: #ABB2BF"> (width </span><span style="color: #56B6C2">-</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">1</span><span style="color: #ABB2BF">), </span><span style="color: #D19A66">2</span><span style="color: #ABB2BF">)</span></span>
+<span class="line"><span style="color: #ABB2BF">y </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">round</span><span style="color: #ABB2BF">(normalized_y </span><span style="color: #56B6C2">/</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">1000</span><span style="color: #ABB2BF"> </span><span style="color: #56B6C2">*</span><span style="color: #ABB2BF"> (height </span><span style="color: #56B6C2">-</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">1</span><span style="color: #ABB2BF">), </span><span style="color: #D19A66">2</span><span style="color: #ABB2BF">)</span></span></code></pre></div></div></figure>
+
+<p>例如图片宽度是 320，归一化中心横坐标为 500，转换结果是 159.5。中心点坐标允许小数，但范围限制在 <code>0..319</code>，不会因为处在最右边而得到不存在的第 320 个像素索引。</p>
+<p>边框使用区域边界约定，右、下边界允许到达图片宽高。因此边框横坐标使用 <code>normalized_x / 1000 * width</code>，而不是 <code>width - 1</code>。这两个约定需要分别验证。</p>
+<h3 id="7-2-编辑边界限制和模型输出校验承担不同职责"><a href="#7-2-编辑边界限制和模型输出校验承担不同职责" class="headerlink" title="7.2 编辑边界限制和模型输出校验承担不同职责"></a>7.2 编辑边界限制和模型输出校验承担不同职责</h3><p>用户拖动点位时，让它停在图片边缘是合理的交互行为。模型却不能返回一个越界数值，然后由程序悄悄截到边缘并显示为成功。</p>
+<p>因此模型输出先检查类型、有限性和 <code>0–1000</code> 范围，换算后再检查像素范围与边框。非法输出可以进入有限次数的重新请求，最终失败则明确报错。</p>
+<p>前端从画布坐标换回原图坐标，需先扣除对应平移，再除以缩放倍率；当前画布内的坐标处理围绕这一关系展开。方向键微调直接修改原图坐标，所以显示倍率不会改变一步的实际距离。</p>
+<h3 id="7-3-裁剪图必须先验证局部范围，再加偏移"><a href="#7-3-裁剪图必须先验证局部范围，再加偏移" class="headerlink" title="7.3 裁剪图必须先验证局部范围，再加偏移"></a>7.3 裁剪图必须先验证局部范围，再加偏移</h3><p>假设识别区是 <code>[100, 50, 300, 170]</code>，宽 200、高 120。视觉适配得到的局部中心如果是 <code>[40, 30]</code>，映射回整图就是 <code>[140, 80]</code>。</p>
+<p>顺序必须是：先确认 <code>[40, 30]</code> 合法地位于这个 200×120 的裁剪区域内，再加上左上角偏移，最后检查整图范围。</p>
+<p>只做整图范围检查是不够的。如果模型返回局部横坐标 250，它已经超出识别区，但加偏移后仍可能落在整张大图内部。这样的结果必须拒绝，否则局部识别会偷偷影响区域外的位置。</p>
+<p>放大裁剪图只是改变发送给模型的图像尺寸。适配层仍按未放大的裁剪区域宽高还原坐标，再加入整图偏移，避免把放大倍数重复计算。</p>
+<h2 id="八、自动保存：维护-base、working-和-pending"><a href="#八、自动保存：维护-base、working-和-pending" class="headerlink" title="八、自动保存：维护 base、working 和 pending"></a>八、自动保存：维护 base、working 和 pending</h2><h3 id="8-1-为什么一个防抖函数不够"><a href="#8-1-为什么一个防抖函数不够" class="headerlink" title="8.1 为什么一个防抖函数不够"></a>8.1 为什么一个防抖函数不够</h3><p>自动保存从表面看，只需要“用户停止输入 900 毫秒后发送请求”。真正的问题发生在请求已经发出、用户继续编辑的时候。</p>
+<p>假设点的横坐标原来是 100。用户把它移到 110，保存请求 R1 发出；在 R1 返回之前，用户又移到 120。如果收到 R1 的回复后直接用服务端数据替换表单，界面会突然跳回 110。</p>
+<p>为了避免这种情况，前端 <code>EditorSession</code> 独立维护三份状态：</p>
+<table>
+<thead>
+<tr>
+<th>状态</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>base</code></td>
+<td>已经得到服务端确认的内容及版本</td>
+</tr>
+<tr>
+<td><code>working</code></td>
+<td>用户此刻正在编辑的内容</td>
+</tr>
+<tr>
+<td><code>pending</code></td>
+<td>已经构造、可能已经发出的那份不可变保存请求</td>
+</tr>
+</tbody></table>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="https://lpy30m.github.io/skuukzky.github.io/images/vlcaptcha-studio/autosave-timeline.png" alt="保存请求迟到时，base、working 和 pending 的变化" data-caption="保存请求迟到时，base、working 和 pending 的变化" loading="lazy"></p>
+<p>R1 返回时，<code>base</code> 更新为 110，<code>pending</code> 清空，<code>working</code> 仍然是 120。再比较工作副本和基线，系统发现还有修改，于是基于新的服务端版本生成 R2。</p>
+<p>这个处理方式同时避免了两个问题：旧回复覆盖新输入，以及新请求错误地沿用旧版本号。</p>
+<h3 id="8-2-网络重试必须复用同一个请求"><a href="#8-2-网络重试必须复用同一个请求" class="headerlink" title="8.2 网络重试必须复用同一个请求"></a>8.2 网络重试必须复用同一个请求</h3><p>当前编辑保存的请求形态如下，示例省略了候选和题目部分：</p>
+<figure class="shiki json"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #ABB2BF">{</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;request_id&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;save-example-001&quot;</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;draft&quot;</span><span style="color: #ABB2BF">: {</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;expected_version&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">7</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;points&quot;</span><span style="color: #ABB2BF">: [</span></span>
+<span class="line"><span style="color: #ABB2BF">      {</span><span style="color: #E06C75">&quot;id&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;p1&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">&quot;label&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;苹果&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">&quot;x&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">110</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">&quot;y&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">80</span><span style="color: #ABB2BF">}</span></span>
+<span class="line"><span style="color: #ABB2BF">    ]</span></span>
+<span class="line"><span style="color: #ABB2BF">  }</span></span>
+<span class="line"><span style="color: #ABB2BF">}</span></span></code></pre></div></div></figure>
+
+<p>在网络错误后，前端保留原始 <code>pending</code>，包括同一个请求 ID、同一个预期版本和同一份内容。即使用户随后继续编辑，也不能把 <code>pending</code> 的内容改掉；新的编辑留在 <code>working</code>，等待这一请求的结果得到确认。</p>
+<p>原因是，客户端不知道一次超时发生在什么位置。可能服务端根本没收到，也可能已经提交，只是回复丢了。保留原请求，才能让后端识别这是重试。</p>
+<p>后端在事务里先查询 <code>editor_saves</code>，再校验新请求的版本。下面是简化后的关键顺序：</p>
+<figure class="shiki python"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">with</span><span style="color: #ABB2BF"> store.</span><span style="color: #61AFEF">connect</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75; font-style: italic">write</span><span style="color: #56B6C2">=</span><span style="color: #D19A66">True</span><span style="color: #ABB2BF">) </span><span style="color: #C678DD">as</span><span style="color: #ABB2BF"> db:</span></span>
+<span class="line"><span style="color: #ABB2BF">    previous </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">find_save_by_request_id</span><span style="color: #ABB2BF">(db, request_id)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">if</span><span style="color: #ABB2BF"> previous:</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #C678DD">if</span><span style="color: #ABB2BF"> previous.task_id </span><span style="color: #56B6C2">!=</span><span style="color: #ABB2BF"> task_id </span><span style="color: #C678DD">or</span><span style="color: #ABB2BF"> previous.request_hash </span><span style="color: #56B6C2">!=</span><span style="color: #ABB2BF"> digest:</span></span>
+<span class="line"><span style="color: #ABB2BF">            </span><span style="color: #C678DD">raise</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">Conflict</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&quot;同一个请求 ID 不能用于不同内容&quot;</span><span style="color: #ABB2BF">)</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #C678DD">return</span><span style="color: #ABB2BF"> previous.reply</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #61AFEF">validate_all_expected_versions</span><span style="color: #ABB2BF">(db, request)</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #61AFEF">validate_all_editor_sections</span><span style="color: #ABB2BF">(request)</span></span>
+<span class="line"><span style="color: #ABB2BF">    reply </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">write_changed_sections</span><span style="color: #ABB2BF">(db, request)</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #61AFEF">remember_request_and_reply</span><span style="color: #ABB2BF">(db, request_id, digest, reply)</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">return</span><span style="color: #ABB2BF"> reply</span></span></code></pre></div></div></figure>
+
+<p>先查幂等记录很关键。R1 如果已经成功，数据库版本当然已经前进；此时重试应返回 R1 原来的回复，而不该先用旧预期版本触发冲突。</p>
+<p>这里实现的是本地数据库保存的幂等性。它不能保证第三方模型只计费一次，也不能把跨网络、跨服务的执行变成全局“恰好一次”。这些是不同的边界。</p>
+<h3 id="8-3-同一次编辑保存必须整体成功或整体失败"><a href="#8-3-同一次编辑保存必须整体成功或整体失败" class="headerlink" title="8.3 同一次编辑保存必须整体成功或整体失败"></a>8.3 同一次编辑保存必须整体成功或整体失败</h3><p>用户可能同时改题目、候选标签和点位。当前保存接口允许一个请求携带三个部分，后端先检查全部版本与全部数据，再开始写入。</p>
+<p>如果候选版本冲突，即使草稿点位本身合法，也不会先保存点位、再返回部分失败。任何一部分失败都会回滚，避免题目已经更新而点位仍停留在另一份编辑中的状态。</p>
+<p>内容完全没有变化时，不必增加对应版本。新内容提交后，服务端返回新的草稿、候选或题目版本，前端更新 <code>base</code>，继续判断 <code>working</code> 是否还有尚未提交的修改。</p>
+<h3 id="8-4-区分网络、冲突和校验错误"><a href="#8-4-区分网络、冲突和校验错误" class="headerlink" title="8.4 区分网络、冲突和校验错误"></a>8.4 区分网络、冲突和校验错误</h3><p>网络错误保留请求并等待重试；版本冲突暂停自动保存并保留本地内容；数据校验错误要求用户修正内容后再次提交。</p>
+<p>三者如果都被处理成“不断重试”，会出现无意义的请求循环：冲突不会因为重发旧版本而消失，非法数据也不会因为多发几次就合法。</p>
+<p>切图、发起模型任务和确认之前，前端调用 <code>flush()</code>，等待正在进行的保存，并持续保存直到 <code>pending</code> 和未提交修改都清空。发生冲突就停在当前图片，让用户先处理，避免把未保存的工作误当成下一步输入。</p>
+<h3 id="8-5-浏览器恢复副本要能恢复尚未确定的请求"><a href="#8-5-浏览器恢复副本要能恢复尚未确定的请求" class="headerlink" title="8.5 浏览器恢复副本要能恢复尚未确定的请求"></a>8.5 浏览器恢复副本要能恢复尚未确定的请求</h3><p>IndexedDB 保存的不只是点位，还包括 <code>base</code>、<code>working</code>、<code>pending</code>、图片签名和冲突信息。刷新页面时，如果之前的请求可能已提交，恢复后的会话可以携带同一个请求继续重试。</p>
+<p>图片签名组合任务 ID、图片尺寸和 SHA-256，避免把旧副本恢复到不匹配的图片上。每个页面有自己的写入标识，防止多个标签页争用同一个缓存记录。</p>
+<p>恢复前或处理冲突前还会保留备份，每张图片最多保留最近 20 份。自动恢复主要面向同页刷新和上次页面记录，其他页面的副本通过恢复界面选择。它仍然依赖同一个浏览器、同一个站点和可用的浏览器存储，不能替代后端备份。</p>
+<h2 id="九、局部重识别：把“修改哪里”也变成明确输入"><a href="#九、局部重识别：把“修改哪里”也变成明确输入" class="headerlink" title="九、局部重识别：把“修改哪里”也变成明确输入"></a>九、局部重识别：把“修改哪里”也变成明确输入</h2><h3 id="9-1-区分识别区和参考区"><a href="#9-1-区分识别区和参考区" class="headerlink" title="9.1 区分识别区和参考区"></a>9.1 区分识别区和参考区</h3><p>整张图片里如果只有一个对象识别错误，重新跑全图可能再次扰动其他候选。局部重识别把目标收缩为用户指定的区域，但它仍然需要完整的数据约定。</p>
+<p>界面区分两种框选：蓝色识别区决定需要返回哪些对象，金色参考区只提供题干或上下文。参考图也可以选择整张图片。发送给视觉模型时，第一张图是识别区，第二张图是可选参考，提示词明确要求只返回第一张图的对象。</p>
+<p>识别区至少为 8×8 个原图像素。选区经过边界检查后，左上角向下取整，右下角向上取整，确保实际裁剪覆盖用户选择的范围。裁剪输入按大小处理后发送给模型，输出再按上一节的局部坐标规则映射回来。</p>
+<h3 id="9-2-完成识别，只写预览记录"><a href="#9-2-完成识别，只写预览记录" class="headerlink" title="9.2 完成识别，只写预览记录"></a>9.2 完成识别，只写预览记录</h3><p>局部结果保存在 <code>region_results</code>，记录关联任务、基础题目版本、基础候选集合、识别区域、参考区域和输出候选。</p>
+<p>模型完成时不会直接替换当前候选，也不会移动人工点位。用户可以先检查预览，再选择添加哪些候选、替换哪些旧候选，或者只修正一个已有点的位置。</p>
+<p>如果识别过程中题目或候选改变，返回结果仍可以保留为历史预览，但应用时会因基础版本过期而被拒绝。普通人工点位修改与候选修改有不同影响：只添加候选时不必覆盖点位；如果准备修正某个人工点，则还需要检查最新草稿版本。</p>
+<h3 id="9-3-替换必须限制在完整位于选区内的对象"><a href="#9-3-替换必须限制在完整位于选区内的对象" class="headerlink" title="9.3 替换必须限制在完整位于选区内的对象"></a>9.3 替换必须限制在完整位于选区内的对象</h3><p>判断一个旧候选能否被替换时，只有中心在选区内还不够。一个大边框可能横跨区域边界，如果把它删掉，选区之外的信息也会被一起删除。</p>
+<p>当前采用较保守的规则：中心必须位于选区内；如果存在边框，整个边框也必须位于选区内。无边框的候选则只按中心判断。下面是对应规则的简写：</p>
+<figure class="shiki python"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">def</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">can_replace</span><span style="color: #ABB2BF">(</span><span style="color: #D19A66; font-style: italic">candidate</span><span style="color: #ABB2BF">, </span><span style="color: #D19A66; font-style: italic">region</span><span style="color: #ABB2BF">):</span></span>
+<span class="line"><span style="color: #ABB2BF">    left, top, right, bottom </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> region</span></span>
+<span class="line"><span style="color: #ABB2BF">    x, y </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> candidate[</span><span style="color: #98C379">&quot;center&quot;</span><span style="color: #ABB2BF">]</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">if</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">not</span><span style="color: #ABB2BF"> (left </span><span style="color: #56B6C2">&lt;=</span><span style="color: #ABB2BF"> x </span><span style="color: #56B6C2">&lt;</span><span style="color: #ABB2BF"> right </span><span style="color: #C678DD">and</span><span style="color: #ABB2BF"> top </span><span style="color: #56B6C2">&lt;=</span><span style="color: #ABB2BF"> y </span><span style="color: #56B6C2">&lt;</span><span style="color: #ABB2BF"> bottom):</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #C678DD">return</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">False</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #ABB2BF">    box </span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF"> candidate.</span><span style="color: #61AFEF">get</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&quot;bbox&quot;</span><span style="color: #ABB2BF">)</span></span>
+<span class="line"><span style="color: #ABB2BF">    </span><span style="color: #C678DD">return</span><span style="color: #ABB2BF"> box </span><span style="color: #C678DD">is</span><span style="color: #ABB2BF"> </span><span style="color: #D19A66">None</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">or</span><span style="color: #ABB2BF"> (</span></span>
+<span class="line"><span style="color: #ABB2BF">        left </span><span style="color: #56B6C2">&lt;=</span><span style="color: #ABB2BF"> box[</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">&lt;</span><span style="color: #ABB2BF"> box[</span><span style="color: #D19A66">2</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">&lt;=</span><span style="color: #ABB2BF"> right</span></span>
+<span class="line"><span style="color: #ABB2BF">        </span><span style="color: #C678DD">and</span><span style="color: #ABB2BF"> top </span><span style="color: #56B6C2">&lt;=</span><span style="color: #ABB2BF"> box[</span><span style="color: #D19A66">1</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">&lt;</span><span style="color: #ABB2BF"> box[</span><span style="color: #D19A66">3</span><span style="color: #ABB2BF">] </span><span style="color: #56B6C2">&lt;=</span><span style="color: #ABB2BF"> bottom</span></span>
+<span class="line"><span style="color: #ABB2BF">    )</span></span></code></pre></div></div></figure>
+
+<p>跨边界的候选需要扩大选区后重新处理，或者人工编辑。这个规则牺牲了一些“一键替换”的便利，换来更明确的影响范围。</p>
+<h3 id="9-4-只修一个点，不能顺带改掉整份标注"><a href="#9-4-只修一个点，不能顺带改掉整份标注" class="headerlink" title="9.4 只修一个点，不能顺带改掉整份标注"></a>9.4 只修一个点，不能顺带改掉整份标注</h3><p>当用户选中人工点 A，再用局部候选修正位置时，后端先复制现有点列表，定位 A，只更新它的坐标和来源引用。A 的标签、列表位置以及其他点的内容继续保留。</p>
+<p>新增候选和更新 A 在同一个事务里执行。如果草稿版本已经变化，整个操作失败，不能先把候选加进去，再告诉用户点位没有修成功。</p>
+<p>局部应用也有请求 ID 和内容摘要。同一个请求重试返回已有回复；同一份局部结果已被应用后，不允许再用另一份不同请求重复应用。局部候选使用带任务标识的 ID，减少和当前集合内已有 ID 冲突的可能。</p>
+<p>前端则把候选和点位一起纳入撤销快照。用户撤销这次修正时，需要恢复两者，不能只把点移回去，却留下刚才添加的候选。当前撤销只覆盖这一编辑会话，长期历史仍由后端版本承担。</p>
+<h2 id="十、后台任务：限制并发，明确取消的实际含义"><a href="#十、后台任务：限制并发，明确取消的实际含义" class="headerlink" title="十、后台任务：限制并发，明确取消的实际含义"></a>十、后台任务：限制并发，明确取消的实际含义</h2><h3 id="10-1-两个工作线程，加一条数据库约束"><a href="#10-1-两个工作线程，加一条数据库约束" class="headerlink" title="10.1 两个工作线程，加一条数据库约束"></a>10.1 两个工作线程，加一条数据库约束</h3><p>当前模型任务由 <code>ThreadPoolExecutor(max_workers=2)</code> 执行。单张、批量和局部识别共用这个池，避免每增加一个入口就额外扩大并发。</p>
+<p>但线程池限制的是整个进程的执行数，同一张图仍可能因为重复点击或多个页面同时发起而被排入多个任务。因此数据库额外建立部分唯一索引：</p>
+<figure class="shiki sql"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #C678DD">CREATE</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">UNIQUE INDEX</span><span style="color: #ABB2BF"> </span><span style="color: #61AFEF">IF</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">NOT</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">EXISTS</span><span style="color: #ABB2BF"> one_running_job</span></span>
+<span class="line"><span style="color: #C678DD">ON</span><span style="color: #ABB2BF"> jobs(task_id)</span></span>
+<span class="line"><span style="color: #C678DD">WHERE</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">status</span><span style="color: #ABB2BF"> </span><span style="color: #C678DD">IN</span><span style="color: #ABB2BF"> (</span><span style="color: #98C379">&#39;queued&#39;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&#39;running&#39;</span><span style="color: #ABB2BF">);</span></span></code></pre></div></div></figure>
+
+<p>这条约束保证同一任务在排队或执行状态下只存在一份活动模型作业。检查放在数据库里，可以覆盖不同请求处理函数同时进入的情况。</p>
+<p>模型任务记录 <code>status</code> 和 <code>phase</code>。前者表示排队、运行、完成、失败或取消，后者说明当前位于检测还是判断阶段。界面据此给出进度，错误记录也能区分失败发生在哪一段。</p>
+<h3 id="10-2-版本检查要在真正调用之前再做一次"><a href="#10-2-版本检查要在真正调用之前再做一次" class="headerlink" title="10.2 版本检查要在真正调用之前再做一次"></a>10.2 版本检查要在真正调用之前再做一次</h3><p>入队时校验版本，并不能保证执行时输入仍然有效。任务可能在队列里等待，这段时间用户已经修改了题目或候选。</p>
+<p>因此工作线程开始处理时，会再次对比任务保存的输入版本和当前版本。候选写入、判断写入也结合预期版本进行检查，避免使用旧输入更新当前状态。</p>
+<p>模型调用在数据库事务之外进行。否则一个耗时十秒的网络请求会把写事务保持十秒，阻塞其他保存。事务只覆盖检查和提交这类短操作，网络请求返回后再进行后续校验。</p>
+<h3 id="10-3-取消意味着停止后续影响，不一定能撤销已发出的调用"><a href="#10-3-取消意味着停止后续影响，不一定能撤销已发出的调用" class="headerlink" title="10.3 取消意味着停止后续影响，不一定能撤销已发出的调用"></a>10.3 取消意味着停止后续影响，不一定能撤销已发出的调用</h3><p>尚未运行的任务可以直接转为取消，工作线程取到后不会再调用模型。已经发出的外部请求可能无法立即中断，当前实现会在请求返回后的检查点读取取消标记，停止下一阶段或丢弃结果。</p>
+<p>如果视觉阶段已经完成并保存，用户随后取消判断阶段，之前的候选记录可能仍然存在。取消不是一次跨整个流水线的回滚，也不会撤销服务商已经发生的请求费用。</p>
+<p>局部识别在保存预览之前还会检查取消状态；批量任务则允许单张失败，继续处理其他图片。“仅重试失败”会创建关联的新批次，并根据当前状态决定哪些任务可以重跑，避免把已确认样本重复处理。</p>
+<h3 id="10-4-服务重启时，明确结束旧的运行状态"><a href="#10-4-服务重启时，明确结束旧的运行状态" class="headerlink" title="10.4 服务重启时，明确结束旧的运行状态"></a>10.4 服务重启时，明确结束旧的运行状态</h3><p>进程内线程池不会在服务重启后继续执行旧的 Python 调用。因此启动时，数据库中仍为排队或运行的旧任务会被标成中断，用户可以重新发起。</p>
+<p>这样至少保证页面不会永远显示“运行中”。已有候选、草稿和确认快照继续保留。</p>
+<p>这还不是一个持久任务队列。如果以后需要多进程或多机器执行，就需要增加工作者身份、租约、心跳、超时回收、重复投递处理，以及外部调用的结果恢复策略。当前实现没有声称已经解决这些问题。</p>
+<h2 id="十一、复核队列：状态是多维的，不能只用一个-done"><a href="#十一、复核队列：状态是多维的，不能只用一个-done" class="headerlink" title="十一、复核队列：状态是多维的，不能只用一个 done"></a>十一、复核队列：状态是多维的，不能只用一个 done</h2><p>一张图片可以同时具有多种事实：存在人工确认历史、当前草稿有新修订、后台又生成了一份建议，或者用户暂时把它标为疑难。</p>
+<p>如果只有一个 <code>status = done</code>，很难表达这些组合。因此当前实现把模型任务状态、人工草稿版本、确认快照和复核标记分别保存，再计算界面需要的摘要状态。</p>
+<p>例如 <code>has_approved_snapshot</code> 和 <code>is_approved</code> 就有区别。前者表示存在当前条件下可用的确认快照，后者还要求当前草稿版本与确认版本一致。用户确认后继续修改草稿时，可以保留上一份有效确认，同时把当前任务显示为有新修订。</p>
+<p>复核标记包括正常、疑难、稍后和无效，还保存原因、备注及独立版本。恢复一个无效或稍后处理的样本，不会自动沿用旧确认，而是要求重新确认。</p>
+<p>当前待复核优先级是可以解释的规则：人工疑难优先，其次是识别失败、结果不完整、点数与题意不符、不确定建议、过期建议等。它没有额外调用一个模型去生成难度评分。</p>
+<p>界面中的“确认并下一张”依次完成：保存全部编辑、检查当前版本并确认、刷新队列、选择下一张。任何一步失败都停在当前图片。顺序点选在确认前检查点数与目标数量一致，单选检查只有一个点，同时要求标签和坐标满足确认条件。</p>
+<p>键盘操作也围绕这个流程设计：方向键做原图像素微调，Shift 加方向键移动十个像素，快捷键确认下一张，裁剪缩略图帮助快速定位对象。输入框和输入法组合输入期间不抢占相应快捷键，避免编辑文字时误删或移动点位。</p>
+<h2 id="十二、导入与导出：文件格式也是数据协议的一部分"><a href="#十二、导入与导出：文件格式也是数据协议的一部分" class="headerlink" title="十二、导入与导出：文件格式也是数据协议的一部分"></a>十二、导入与导出：文件格式也是数据协议的一部分</h2><h3 id="12-1-导入不能只检查文件后缀"><a href="#12-1-导入不能只检查文件后缀" class="headerlink" title="12.1 导入不能只检查文件后缀"></a>12.1 导入不能只检查文件后缀</h3><p>当前支持文件夹、ZIP、多图片，以及 JSON&#x2F;JSONL 标注清单。文件夹分片上传，ZIP 在后台解析，导入进度与逐项错误保存在任务记录中。</p>
+<p>图片需要实际解码并检查大小与像素限制，再按方向规范化。ZIP 导入还检查路径穿越、绝对路径、符号链接、加密压缩包及解压后的总量限制。标注清单则检查图片尺寸和坐标空间，避免把一套缩放图片的标注静默套到另一套尺寸上。</p>
+<p>重复导入同一路径的相同图片会跳过；同一路径对应不同内容会报错，不会直接替换用户已经编辑的图片。这样的行为让中断后继续追加导入有明确语义。</p>
+<p>导入的既有标注会先成为待复核草稿。文件里有坐标，只能说明有人提供了标注，不能自动等同于当前工作台中的人工确认。</p>
+<h3 id="12-2-导出使用确认快照，而不是屏幕上的最后一份内容"><a href="#12-2-导出使用确认快照，而不是屏幕上的最后一份内容" class="headerlink" title="12.2 导出使用确认快照，而不是屏幕上的最后一份内容"></a>12.2 导出使用确认快照，而不是屏幕上的最后一份内容</h3><p>当前导出会为每个任务查找与当前题目版本一致的最新人工确认快照，并排除不符合复核条件的样本。几个具体场景如下：</p>
+<table>
+<thead>
+<tr>
+<th>当前状态</th>
+<th>导出行为</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>只有模型建议或未确认草稿</td>
+<td>不导出</td>
+</tr>
+<tr>
+<td>已确认版本 V1，随后只修改人工草稿</td>
+<td>仍导出 V1，直到明确确认新版本</td>
+</tr>
+<tr>
+<td>已确认后重新运行模型</td>
+<td>保留既有确认快照，不由新建议替换</td>
+</tr>
+<tr>
+<td>题目已经改变</td>
+<td>旧题目的确认不再符合导出条件</td>
+</tr>
+<tr>
+<td>标为疑难、稍后或无效</td>
+<td>暂时排除</td>
+</tr>
+<tr>
+<td>恢复正常但要求重新确认</td>
+<td>重新确认后再进入导出</td>
+</tr>
+</tbody></table>
+<p>“继续修改草稿时仍导出之前的确认版”是一个需要明确告知用户的选择。它让未完成的编辑不会污染已认可的数据。如果旧版本身已经被发现错误，就应标记进入复核，或者完成新修订并确认，不能假设编辑动作已经自动撤销旧版的可用性。</p>
+<p>ZIP 中包含图片和 <code>annotations.jsonl</code>。下面是示意记录，ID 和哈希均为说明用值，省略了部分字段：</p>
+<figure class="shiki json"><div class='codeblock'><div class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></div><div class="code"><pre class="shiki one-dark-pro"><code><span class="line"><span style="color: #ABB2BF">{</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;schema&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;vlcaptcha-studio/v1&quot;</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;kind&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;click&quot;</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;image&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;images/task-example.png&quot;</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;width&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">320</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;height&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">160</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;coordinate_space&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;original_image_pixels&quot;</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;question&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;点击苹果&quot;</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;selection_mode&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;single&quot;</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;points&quot;</span><span style="color: #ABB2BF">: [</span></span>
+<span class="line"><span style="color: #ABB2BF">    {</span></span>
+<span class="line"><span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;id&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;p1&quot;</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;label&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;苹果&quot;</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;x&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">121</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;y&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">82</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;candidate_set_id&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;set-example&quot;</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;candidate_id&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;c1&quot;</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;prediction_id&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;prediction-example&quot;</span></span>
+<span class="line"><span style="color: #ABB2BF">    }</span></span>
+<span class="line"><span style="color: #ABB2BF">  ],</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;annotation_revision&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">2</span><span style="color: #ABB2BF">,</span></span>
+<span class="line"><span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;source&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;human_confirmed&quot;</span></span>
+<span class="line"><span style="color: #ABB2BF">}</span></span></code></pre></div></div></figure>
+
+<p>完整导出还包含图片 SHA-256、原始名称、确认时间、数据集和示例标记等。内置示例有 <code>demo_fixture</code> 字段，后续做评测或训练时可以主动排除。</p>
+<p>还要说明当前可追溯性的范围：导出包含来源 ID，但没有把所有候选集合和模型原始响应一并打包。要从 ID 继续追查完整模型过程，需要保留对应数据库。图片和 JSONL 足以交付标注数据，但不能独立替代整套项目审计记录。</p>
+<h2 id="十三、接入兼容模型时，保留协议的真实差别"><a href="#十三、接入兼容模型时，保留协议的真实差别" class="headerlink" title="十三、接入兼容模型时，保留协议的真实差别"></a>十三、接入兼容模型时，保留协议的真实差别</h2><p>项目最初固定让 Jev 参与候选判断，后续为了使用已有服务，又加入了通用 Chat Completions 兼容接口。两种适配器向业务层提供类似的候选选择结果，但请求和证据并不相同。</p>
+<p>Jev 返回 <code>Choice</code>、<code>Noul</code> 等结构；兼容接口则按提示词返回 <code>selected_ids</code>、<code>uncertain_ids</code> 和简短原因。兼容适配器不会凭空生成 Jev 的概率或置信度，相关字段保留为空，并在记录中标明实际提供方。</p>
+<p>无论用哪个适配器，应用前都必须检查候选 ID、重复选择、顺序缺失和数据版本。编辑器不必知道模型供应商的每个协议细节，只消费经过适配与检查的结果。</p>
+<p>如果一个兼容服务实际支持图片输入，可以同时承担视觉阶段和判断阶段。这仍然是两个逻辑步骤，需要分别检查请求和输出，不能因为文本接口返回正常就推断看图能力也可用。</p>
+<p>模型配置保存在后端，网页读取时只获得配置状态、地址和模型名称，不回显完整密钥。网页保存配置后新请求可以使用新设置；独立视觉模型配置也可以通过环境文件提供。</p>
+<p>本地工作台并不意味着模型推理全部离线。在线模式下，图片发送给配置的视觉服务，结构化候选发送给配置的判断服务。恢复副本和标注导出不包含模型密钥，原始响应记录也需要继续避免混入认证头等内容。</p>
+<p>当前使用的是固定提交的上游库代码，保留 MIT 许可及来源说明。外层实现负责 ID、校验、人工编辑与版本，不直接修改这份上游副本。这样升级上游时可以明确比较输入输出差异，也便于固定一份可复现的实现基线。</p>
+<h2 id="十四、用什么测试证明这些设计没有被破坏"><a href="#十四、用什么测试证明这些设计没有被破坏" class="headerlink" title="十四、用什么测试证明这些设计没有被破坏"></a>十四、用什么测试证明这些设计没有被破坏</h2><h3 id="14-1-先测数据行为，再测真实模型效果"><a href="#14-1-先测数据行为，再测真实模型效果" class="headerlink" title="14.1 先测数据行为，再测真实模型效果"></a>14.1 先测数据行为，再测真实模型效果</h3><p>模型输出有不确定性，付费接口也不适合成为每次本地回归的前置条件。因此测试分成几个层次。</p>
+<p>协议测试使用模拟响应，检查请求形态、三种选择模式、非法 ID、概率、重复目标以及输出截断等问题。数据工作流测试使用临时数据库和真实的应用接口，检查版本与事务行为。前端会话测试控制请求返回顺序，检查迟到回复、重试和恢复是否覆盖新编辑。</p>
+<p>这些测试最有价值的断言，是验证那些不能被破坏的规则。例如：</p>
+<ul>
+<li>已有人工点位时重跑模型，人工坐标与既有导出结果保持不变。</li>
+<li>一个编辑请求的候选版本冲突，题目和点位部分也不会被提交。</li>
+<li>保存已成功、回复丢失，再用同一请求 ID 重试，不新增修订。</li>
+<li>用户在保存期间继续编辑，旧回复只更新基线，不覆盖工作副本。</li>
+<li>局部结果预览生成后，候选、草稿和确认历史仍未变化。</li>
+<li>局部修正只移动指定点，保留其他点、标签与顺序。</li>
+<li>裁剪区域外的输出，即使能落在整图内，也必须拒绝。</li>
+<li>题目改变后，旧确认不能继续被当成当前题目的标注导出。</li>
+</ul>
+<p>这些例子也比单纯断言“接口返回 200”更能说明系统是否可靠。浏览器验证则补充拖动、缩放、放大镜边缘显示、撤销和选区操作等交互问题。</p>
+<h3 id="14-2-五张真实图片揭示了什么"><a href="#14-2-五张真实图片揭示了什么" class="headerlink" title="14.2 五张真实图片揭示了什么"></a>14.2 五张真实图片揭示了什么</h3><p>2026 年 9 月 27 日的真实测试使用了配置的兼容中转接口，模型标识为 <code>deepseek-v4.1-flash</code>。五张图片都完成视觉与候选判断，但人工检查发现：</p>
+<table>
+<thead>
+<tr>
+<th>任务</th>
+<th>候选数 &#x2F; 选中数</th>
+<th>人工检查</th>
+<th>完成耗时，含排队</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>蓝色圆形，单选</td>
+<td>4 &#x2F; 1</td>
+<td>选中正确目标，中心偏上约 17 像素</td>
+<td>9.32 秒</td>
+</tr>
+<tr>
+<td>红色图形，多选</td>
+<td>5 &#x2F; 3</td>
+<td>选中三个目标，中心偏移约 19–22 像素</td>
+<td>7.44 秒</td>
+</tr>
+<tr>
+<td>字母 A → B → C → D</td>
+<td>6 &#x2F; 4</td>
+<td>顺序正确，中心偏移约 2–6 像素</td>
+<td>6.74 秒</td>
+</tr>
+<tr>
+<td>风景背景中的图标顺序</td>
+<td>14 &#x2F; 3</td>
+<td>剃须刀与高脚杯混淆，落点偏移</td>
+<td>13.85 秒</td>
+</tr>
+<tr>
+<td>噪声背景中的飞机</td>
+<td>11 &#x2F; 1</td>
+<td>选中了上方干扰图标，未命中目标</td>
+<td>17.00 秒</td>
+</tr>
+</tbody></table>
+<p>第一张单独运行，其他四张用两个工作线程处理，后四张批次的总墙钟时间约 18.2 秒。表里的时间包含等待，不能直接拿来当作模型本身的推理延迟。</p>
+<p>前三张是项目内置图形和字母图片，后两张是已有的复杂图标图片。位置比较使用人工检查参考区域和中心，没有建立像素级标准答案。这是一次帮助发现问题的小样本测试，不是准确率基准，更不能推导出“通用准确率为 60%”。</p>
+<p>这次调用使用兼容服务，没有验证 Jev 的在线识别或判断质量；中转站的模型标识也不能单独证明底层模型身份和版本。</p>
+<p>它实际帮助确定了下一轮功能优先级：类别混淆需要把裁剪图放到标签旁边，十几像素的偏差需要放大镜和键盘微调，局部漏检则需要独立识别区。这些功能来自已经观察到的问题。</p>
+<h3 id="14-3-失败也需要作为结果记录"><a href="#14-3-失败也需要作为结果记录" class="headerlink" title="14.3 失败也需要作为结果记录"></a>14.3 失败也需要作为结果记录</h3><p>接入过程中曾遇到图片请求被网关返回 HTTP 403。对照请求发现，同一配置下不同客户端标识表现不同，改用工作台自身标识后完整流程能够运行。这样的结果只能说明当时那条接入链路的兼容性问题得到处理，不能泛化为所有服务都应使用相同做法。</p>
+<p>后续局部识别尝试又没有拿到有效候选，诊断请求捕获了中转站 HTTP 500。附带参考图与只发送裁剪图的应用内尝试均未成功，因此真实局部识别效果仍未验证通过。</p>
+<p>界面和数据流程通过模拟测试，真实服务调用失败，这两个事实需要同时保留。错误提示也应区分服务异常、限流、超时、连接失败与数据解析失败，不能把所有失败都归因于密钥。</p>
+<h2 id="十五、接下来如何判断这套方案是否值得继续投入"><a href="#十五、接下来如何判断这套方案是否值得继续投入" class="headerlink" title="十五、接下来如何判断这套方案是否值得继续投入"></a>十五、接下来如何判断这套方案是否值得继续投入</h2><p>下一阶段最有价值的工作，是建立固定样本和稳定的人工确认标准。只有这样，换模型、改提示词或加入局部识别之后，才能知道改动究竟解决了什么问题。</p>
+<p>评测指标也应按阶段拆开。视觉阶段看对象是否漏检、类别是否混淆、中心和边框误差多大；判断阶段在固定候选上看是否选对、顺序是否正确；完整工作流则看有多少样本需要人工修改，平均修改几个点，完成一张确认标注要多久。</p>
+<p>如果需要衡量定位质量，可以记录中心欧氏距离，也可以按图像对角线归一化以便比较不同尺寸。对于允许在对象内部任意点击的任务，还应检查落点是否位于有效区域。不同指标回答不同问题，不能仅用一个中心距离替代全部任务成功条件。</p>
+<p>成本同样要区分两阶段。一次完整预标注包括视觉请求和判断请求；修改候选后只重跑判断，会减少重复视觉调用；局部识别则新增一次视觉成本。最终可以比较的是“每份人工确认样本的模型费用”和“每份样本的人工修正时间”。当前系统记录了部分模型返回的用量，但完整费用统计与固定样本评测尚未做成产品功能。</p>
+<p>为了让历史实验更容易复现，后续还应明确保存提示词模板版本、适配器版本、模型参数及可确认的实际模型版本。当前已有 Git 提交、依赖锁、模型标识、候选版本及部分原始请求响应，但还没有形成独立完整的实验清单。尤其是视觉阶段，并没有独立持久化所有提示词版本信息，不能把现有记录夸大成完整复现实验平台。</p>
+<p>其他后续工作包括同图多模型对比、更完善的调用统计，以及不同题型编辑器。多人协作则需要额外设计身份、权限、审核职责和数据隔离，不能只把当前服务监听地址改成公网地址就算完成。</p>
+<p>对我来说，接下来的判断标准很具体：在同一批图片上，用户能否用更少的修正动作、更短的处理时间，得到一份来源清楚且明确确认的标注。视觉模型、Jev、编辑器和版本管理，都需要围绕这个标准继续改进。</p>
+<h2 id="资料与代码"><a href="#资料与代码" class="headerlink" title="资料与代码"></a>资料与代码</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/miloira/vlcaptcha">vlcaptcha 上游仓库</a>。</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/miloira/vlcaptcha/tree/1e4ef12a630f3158bc1a680a290662d231c4b494">本项目固定的上游提交</a>。</li>
+<li><a target="_blank" rel="noopener" href="https://docs.typesafe.ai/models">TypeSafe 模型文档</a>。</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/lpy30m/vlcaptcha-studio">VLCaptcha Studio 项目仓库</a>，当前为私有仓库，需要访问权限。</li>
+</ul>
+<p>本文依据 VLCaptcha Studio 0.2.0、2026 年 9 月 27 日开发与实测记录，以及 9 月 28 日整理时的代码撰写。正文中的请求、数据库结构和控制流程示例为说明关键机制而精简，具体字段与完整校验以实现为准。</p>
+
+    
+  </article>
+
+  
+      
+    <div class="nexmoe-post-copyright">
+        <strong>本文作者：</strong>skuukzky<br>
+        <strong>本文链接：</strong><a href="https://lpy30m.github.io/skuukzky.github.io/2026/09/28/vlcaptcha-studio-design/" title="https:&#x2F;&#x2F;lpy30m.github.io&#x2F;skuukzky.github.io&#x2F;2026&#x2F;09&#x2F;28&#x2F;vlcaptcha-studio-design&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;lpy30m.github.io&#x2F;skuukzky.github.io&#x2F;2026&#x2F;09&#x2F;28&#x2F;vlcaptcha-studio-design&#x2F;</a><br>
+        
+            <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+
+        
+    </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+        <a class="nexmoefont icon-tag-fill -none-link" href="/skuukzky.github.io/tags/AI/" rel="tag">AI</a> <a class="nexmoefont icon-tag-fill -none-link" href="/skuukzky.github.io/tags/Jev/" rel="tag">Jev</a> <a class="nexmoefont icon-tag-fill -none-link" href="/skuukzky.github.io/tags/%E5%B7%A5%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">工程设计</a> <a class="nexmoefont icon-tag-fill -none-link" href="/skuukzky.github.io/tags/%E6%A0%87%E6%B3%A8%E5%B7%A5%E5%85%B7/" rel="tag">标注工具</a>
+    
+</div>
+  
+  
+    <script async src="/skuukzky.github.io/js/copy-codeblock.js?v=1790584277141"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          <script src="https://giscus.app/client.js"
+    data-repo="lpy30m/skuukzky.github.io"
+    data-repo-id="R_kgDOMnIPZw"
+    data-category="General"
+    data-category-id="DIC_kwDOMnIPZ84Ch3f5"
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async>
+</script>
+
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E4%BB%8E%E4%B8%A4%E9%98%B6%E6%AE%B5%E8%AF%86%E5%88%AB%EF%BC%8C%E8%B5%B0%E5%90%91%E5%8F%AF%E7%BC%96%E8%BE%91%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81"><span class="toc-number">1.</span> <span class="toc-text">一、从两阶段识别，走向可编辑的工作流</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%85%88%E7%A1%AE%E5%AE%9A%E7%B3%BB%E7%BB%9F%E5%BF%85%E9%A1%BB%E5%A7%8B%E7%BB%88%E6%BB%A1%E8%B6%B3%E7%9A%84%E8%A7%84%E5%88%99"><span class="toc-number">2.</span> <span class="toc-text">二、先确定系统必须始终满足的规则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%95%B4%E4%BD%93%E7%BB%93%E6%9E%84%EF%BC%9A%E8%AE%A9%E6%A8%A1%E5%9E%8B%E9%80%82%E9%85%8D%E4%B8%8E%E7%BC%96%E8%BE%91%E6%B5%81%E7%A8%8B%E5%88%86%E5%88%AB%E6%BC%94%E8%BF%9B"><span class="toc-number">3.</span> <span class="toc-text">三、整体结构：让模型适配与编辑流程分别演进</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%80%99%E9%80%89%E5%8D%8F%E8%AE%AE%EF%BC%9A%E6%8A%8A%E2%80%9C%E6%A8%A1%E5%9E%8B%E6%8F%8F%E8%BF%B0%E2%80%9D%E5%8F%98%E6%88%90%E5%8F%AF%E6%A3%80%E6%9F%A5%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="toc-number">4.</span> <span class="toc-text">四、候选协议：把“模型描述”变成可检查的数据</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%80%99%E9%80%89%E5%BF%85%E9%A1%BB%E6%9C%89%E8%BA%AB%E4%BB%BD%EF%BC%8C%E4%B9%9F%E5%BF%85%E9%A1%BB%E6%9C%89%E5%87%A0%E4%BD%95%E7%BA%A6%E5%AE%9A"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 候选必须有身份，也必须有几何约定</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-ID-%E5%8F%AA%E5%9C%A8%E5%85%B7%E4%BD%93%E5%80%99%E9%80%89%E7%89%88%E6%9C%AC%E4%B8%AD%E6%9C%89%E6%84%8F%E4%B9%89"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 ID 只在具体候选版本中有意义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E8%AE%A9%E5%88%A4%E6%96%AD%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9-ID%EF%BC%8C%E9%81%BF%E5%85%8D%E9%87%8D%E6%96%B0%E7%94%9F%E6%88%90%E5%9D%90%E6%A0%87"><span class="toc-number">4.3.</span> <span class="toc-text">4.3 让判断模型选择 ID，避免重新生成坐标</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81Jev-%E7%9A%84%E4%B8%89%E7%A7%8D%E8%AF%B7%E6%B1%82%E5%A6%82%E4%BD%95%E5%AF%B9%E5%BA%94%E7%82%B9%E9%80%89%E4%BB%BB%E5%8A%A1"><span class="toc-number">5.</span> <span class="toc-text">五、Jev 的三种请求如何对应点选任务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%8D%95%E9%80%89%EF%BC%9A%E6%98%BE%E5%BC%8F%E4%BF%9D%E7%95%99%E2%80%9C%E6%97%A0%E5%8C%B9%E9%85%8D%E2%80%9D"><span class="toc-number">5.1.</span> <span class="toc-text">5.1 单选：显式保留“无匹配”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E5%A4%9A%E9%80%89%EF%BC%9A%E9%80%90%E4%B8%AA%E5%88%A4%E6%96%AD%EF%BC%8C%E5%86%8D%E7%BB%9F%E4%B8%80%E7%94%9F%E6%88%90%E5%BB%BA%E8%AE%AE"><span class="toc-number">5.2.</span> <span class="toc-text">5.2 多选：逐个判断，再统一生成建议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E9%A1%BA%E5%BA%8F%E7%82%B9%E9%80%89%EF%BC%9A%E6%AF%8F%E4%B8%AA%E4%BD%8D%E7%BD%AE%E7%8B%AC%E7%AB%8B%E6%8F%90%E9%97%AE%EF%BC%8C%E5%86%8D%E6%A3%80%E6%9F%A5%E6%95%B4%E4%BD%93%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">5.3.</span> <span class="toc-text">5.3 顺序点选：每个位置独立提问，再检查整体一致性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%95%B0%E6%8D%AE%E5%BA%93%EF%BC%9A%E7%94%A8%E4%B8%8D%E5%8F%AF%E5%8F%98%E7%89%88%E6%9C%AC%E4%BF%9D%E5%AD%98%E6%9D%A5%E8%B7%AF"><span class="toc-number">6.</span> <span class="toc-text">六、数据库：用不可变版本保存来路</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E4%B8%80%E5%BC%A0%E4%BB%BB%E5%8A%A1%E8%A1%A8%E8%A3%85%E4%B8%8D%E4%B8%8B%E6%89%80%E6%9C%89%E7%8A%B6%E6%80%81"><span class="toc-number">6.1.</span> <span class="toc-text">6.1 一张任务表装不下所有状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E2%80%9C%E5%BB%BA%E8%AE%AE%E6%98%AF%E5%90%A6%E8%BF%87%E6%9C%9F%E2%80%9D%E6%98%AF%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E6%A3%80%E6%9F%A5"><span class="toc-number">6.2.</span> <span class="toc-text">6.2 “建议是否过期”是依赖关系检查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-%E5%9C%A8%E4%BA%8B%E5%8A%A1%E9%87%8C%E6%A3%80%E6%9F%A5%EF%BC%8C%E9%81%BF%E5%85%8D%E6%A3%80%E6%9F%A5%E5%92%8C%E5%86%99%E5%85%A5%E4%B9%8B%E9%97%B4%E5%87%BA%E7%8E%B0%E7%A9%BA%E9%9A%99"><span class="toc-number">6.3.</span> <span class="toc-text">6.3 在事务里检查，避免检查和写入之间出现空隙</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%9D%90%E6%A0%87%E4%BD%93%E7%B3%BB%EF%BC%9A%E6%8A%8A%E6%AF%8F%E4%B8%80%E6%AD%A5%E8%BD%AC%E6%8D%A2%E5%86%99%E6%B8%85%E6%A5%9A"><span class="toc-number">7.</span> <span class="toc-text">七、坐标体系：把每一步转换写清楚</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-%E5%8C%BA%E5%88%86%E5%B7%A5%E4%BD%9C%E5%9B%BE%E7%89%87%E3%80%81%E6%A8%A1%E5%9E%8B%E8%BE%93%E5%85%A5%E5%92%8C%E7%94%BB%E5%B8%83%E6%98%BE%E7%A4%BA"><span class="toc-number">7.1.</span> <span class="toc-text">7.1 区分工作图片、模型输入和画布显示</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-%E7%BC%96%E8%BE%91%E8%BE%B9%E7%95%8C%E9%99%90%E5%88%B6%E5%92%8C%E6%A8%A1%E5%9E%8B%E8%BE%93%E5%87%BA%E6%A0%A1%E9%AA%8C%E6%89%BF%E6%8B%85%E4%B8%8D%E5%90%8C%E8%81%8C%E8%B4%A3"><span class="toc-number">7.2.</span> <span class="toc-text">7.2 编辑边界限制和模型输出校验承担不同职责</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-%E8%A3%81%E5%89%AA%E5%9B%BE%E5%BF%85%E9%A1%BB%E5%85%88%E9%AA%8C%E8%AF%81%E5%B1%80%E9%83%A8%E8%8C%83%E5%9B%B4%EF%BC%8C%E5%86%8D%E5%8A%A0%E5%81%8F%E7%A7%BB"><span class="toc-number">7.3.</span> <span class="toc-text">7.3 裁剪图必须先验证局部范围，再加偏移</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E8%87%AA%E5%8A%A8%E4%BF%9D%E5%AD%98%EF%BC%9A%E7%BB%B4%E6%8A%A4-base%E3%80%81working-%E5%92%8C-pending"><span class="toc-number">8.</span> <span class="toc-text">八、自动保存：维护 base、working 和 pending</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#8-1-%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%80%E4%B8%AA%E9%98%B2%E6%8A%96%E5%87%BD%E6%95%B0%E4%B8%8D%E5%A4%9F"><span class="toc-number">8.1.</span> <span class="toc-text">8.1 为什么一个防抖函数不够</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-2-%E7%BD%91%E7%BB%9C%E9%87%8D%E8%AF%95%E5%BF%85%E9%A1%BB%E5%A4%8D%E7%94%A8%E5%90%8C%E4%B8%80%E4%B8%AA%E8%AF%B7%E6%B1%82"><span class="toc-number">8.2.</span> <span class="toc-text">8.2 网络重试必须复用同一个请求</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-3-%E5%90%8C%E4%B8%80%E6%AC%A1%E7%BC%96%E8%BE%91%E4%BF%9D%E5%AD%98%E5%BF%85%E9%A1%BB%E6%95%B4%E4%BD%93%E6%88%90%E5%8A%9F%E6%88%96%E6%95%B4%E4%BD%93%E5%A4%B1%E8%B4%A5"><span class="toc-number">8.3.</span> <span class="toc-text">8.3 同一次编辑保存必须整体成功或整体失败</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-4-%E5%8C%BA%E5%88%86%E7%BD%91%E7%BB%9C%E3%80%81%E5%86%B2%E7%AA%81%E5%92%8C%E6%A0%A1%E9%AA%8C%E9%94%99%E8%AF%AF"><span class="toc-number">8.4.</span> <span class="toc-text">8.4 区分网络、冲突和校验错误</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-5-%E6%B5%8F%E8%A7%88%E5%99%A8%E6%81%A2%E5%A4%8D%E5%89%AF%E6%9C%AC%E8%A6%81%E8%83%BD%E6%81%A2%E5%A4%8D%E5%B0%9A%E6%9C%AA%E7%A1%AE%E5%AE%9A%E7%9A%84%E8%AF%B7%E6%B1%82"><span class="toc-number">8.5.</span> <span class="toc-text">8.5 浏览器恢复副本要能恢复尚未确定的请求</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E5%B1%80%E9%83%A8%E9%87%8D%E8%AF%86%E5%88%AB%EF%BC%9A%E6%8A%8A%E2%80%9C%E4%BF%AE%E6%94%B9%E5%93%AA%E9%87%8C%E2%80%9D%E4%B9%9F%E5%8F%98%E6%88%90%E6%98%8E%E7%A1%AE%E8%BE%93%E5%85%A5"><span class="toc-number">9.</span> <span class="toc-text">九、局部重识别：把“修改哪里”也变成明确输入</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#9-1-%E5%8C%BA%E5%88%86%E8%AF%86%E5%88%AB%E5%8C%BA%E5%92%8C%E5%8F%82%E8%80%83%E5%8C%BA"><span class="toc-number">9.1.</span> <span class="toc-text">9.1 区分识别区和参考区</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-2-%E5%AE%8C%E6%88%90%E8%AF%86%E5%88%AB%EF%BC%8C%E5%8F%AA%E5%86%99%E9%A2%84%E8%A7%88%E8%AE%B0%E5%BD%95"><span class="toc-number">9.2.</span> <span class="toc-text">9.2 完成识别，只写预览记录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-3-%E6%9B%BF%E6%8D%A2%E5%BF%85%E9%A1%BB%E9%99%90%E5%88%B6%E5%9C%A8%E5%AE%8C%E6%95%B4%E4%BD%8D%E4%BA%8E%E9%80%89%E5%8C%BA%E5%86%85%E7%9A%84%E5%AF%B9%E8%B1%A1"><span class="toc-number">9.3.</span> <span class="toc-text">9.3 替换必须限制在完整位于选区内的对象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-4-%E5%8F%AA%E4%BF%AE%E4%B8%80%E4%B8%AA%E7%82%B9%EF%BC%8C%E4%B8%8D%E8%83%BD%E9%A1%BA%E5%B8%A6%E6%94%B9%E6%8E%89%E6%95%B4%E4%BB%BD%E6%A0%87%E6%B3%A8"><span class="toc-number">9.4.</span> <span class="toc-text">9.4 只修一个点，不能顺带改掉整份标注</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E3%80%81%E5%90%8E%E5%8F%B0%E4%BB%BB%E5%8A%A1%EF%BC%9A%E9%99%90%E5%88%B6%E5%B9%B6%E5%8F%91%EF%BC%8C%E6%98%8E%E7%A1%AE%E5%8F%96%E6%B6%88%E7%9A%84%E5%AE%9E%E9%99%85%E5%90%AB%E4%B9%89"><span class="toc-number">10.</span> <span class="toc-text">十、后台任务：限制并发，明确取消的实际含义</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#10-1-%E4%B8%A4%E4%B8%AA%E5%B7%A5%E4%BD%9C%E7%BA%BF%E7%A8%8B%EF%BC%8C%E5%8A%A0%E4%B8%80%E6%9D%A1%E6%95%B0%E6%8D%AE%E5%BA%93%E7%BA%A6%E6%9D%9F"><span class="toc-number">10.1.</span> <span class="toc-text">10.1 两个工作线程，加一条数据库约束</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10-2-%E7%89%88%E6%9C%AC%E6%A3%80%E6%9F%A5%E8%A6%81%E5%9C%A8%E7%9C%9F%E6%AD%A3%E8%B0%83%E7%94%A8%E4%B9%8B%E5%89%8D%E5%86%8D%E5%81%9A%E4%B8%80%E6%AC%A1"><span class="toc-number">10.2.</span> <span class="toc-text">10.2 版本检查要在真正调用之前再做一次</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10-3-%E5%8F%96%E6%B6%88%E6%84%8F%E5%91%B3%E7%9D%80%E5%81%9C%E6%AD%A2%E5%90%8E%E7%BB%AD%E5%BD%B1%E5%93%8D%EF%BC%8C%E4%B8%8D%E4%B8%80%E5%AE%9A%E8%83%BD%E6%92%A4%E9%94%80%E5%B7%B2%E5%8F%91%E5%87%BA%E7%9A%84%E8%B0%83%E7%94%A8"><span class="toc-number">10.3.</span> <span class="toc-text">10.3 取消意味着停止后续影响，不一定能撤销已发出的调用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10-4-%E6%9C%8D%E5%8A%A1%E9%87%8D%E5%90%AF%E6%97%B6%EF%BC%8C%E6%98%8E%E7%A1%AE%E7%BB%93%E6%9D%9F%E6%97%A7%E7%9A%84%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81"><span class="toc-number">10.4.</span> <span class="toc-text">10.4 服务重启时，明确结束旧的运行状态</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%B8%80%E3%80%81%E5%A4%8D%E6%A0%B8%E9%98%9F%E5%88%97%EF%BC%9A%E7%8A%B6%E6%80%81%E6%98%AF%E5%A4%9A%E7%BB%B4%E7%9A%84%EF%BC%8C%E4%B8%8D%E8%83%BD%E5%8F%AA%E7%94%A8%E4%B8%80%E4%B8%AA-done"><span class="toc-number">11.</span> <span class="toc-text">十一、复核队列：状态是多维的，不能只用一个 done</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%BA%8C%E3%80%81%E5%AF%BC%E5%85%A5%E4%B8%8E%E5%AF%BC%E5%87%BA%EF%BC%9A%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E4%B9%9F%E6%98%AF%E6%95%B0%E6%8D%AE%E5%8D%8F%E8%AE%AE%E7%9A%84%E4%B8%80%E9%83%A8%E5%88%86"><span class="toc-number">12.</span> <span class="toc-text">十二、导入与导出：文件格式也是数据协议的一部分</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#12-1-%E5%AF%BC%E5%85%A5%E4%B8%8D%E8%83%BD%E5%8F%AA%E6%A3%80%E6%9F%A5%E6%96%87%E4%BB%B6%E5%90%8E%E7%BC%80"><span class="toc-number">12.1.</span> <span class="toc-text">12.1 导入不能只检查文件后缀</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-2-%E5%AF%BC%E5%87%BA%E4%BD%BF%E7%94%A8%E7%A1%AE%E8%AE%A4%E5%BF%AB%E7%85%A7%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E5%B1%8F%E5%B9%95%E4%B8%8A%E7%9A%84%E6%9C%80%E5%90%8E%E4%B8%80%E4%BB%BD%E5%86%85%E5%AE%B9"><span class="toc-number">12.2.</span> <span class="toc-text">12.2 导出使用确认快照，而不是屏幕上的最后一份内容</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%B8%89%E3%80%81%E6%8E%A5%E5%85%A5%E5%85%BC%E5%AE%B9%E6%A8%A1%E5%9E%8B%E6%97%B6%EF%BC%8C%E4%BF%9D%E7%95%99%E5%8D%8F%E8%AE%AE%E7%9A%84%E7%9C%9F%E5%AE%9E%E5%B7%AE%E5%88%AB"><span class="toc-number">13.</span> <span class="toc-text">十三、接入兼容模型时，保留协议的真实差别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E5%9B%9B%E3%80%81%E7%94%A8%E4%BB%80%E4%B9%88%E6%B5%8B%E8%AF%95%E8%AF%81%E6%98%8E%E8%BF%99%E4%BA%9B%E8%AE%BE%E8%AE%A1%E6%B2%A1%E6%9C%89%E8%A2%AB%E7%A0%B4%E5%9D%8F"><span class="toc-number">14.</span> <span class="toc-text">十四、用什么测试证明这些设计没有被破坏</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#14-1-%E5%85%88%E6%B5%8B%E6%95%B0%E6%8D%AE%E8%A1%8C%E4%B8%BA%EF%BC%8C%E5%86%8D%E6%B5%8B%E7%9C%9F%E5%AE%9E%E6%A8%A1%E5%9E%8B%E6%95%88%E6%9E%9C"><span class="toc-number">14.1.</span> <span class="toc-text">14.1 先测数据行为，再测真实模型效果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-2-%E4%BA%94%E5%BC%A0%E7%9C%9F%E5%AE%9E%E5%9B%BE%E7%89%87%E6%8F%AD%E7%A4%BA%E4%BA%86%E4%BB%80%E4%B9%88"><span class="toc-number">14.2.</span> <span class="toc-text">14.2 五张真实图片揭示了什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-3-%E5%A4%B1%E8%B4%A5%E4%B9%9F%E9%9C%80%E8%A6%81%E4%BD%9C%E4%B8%BA%E7%BB%93%E6%9E%9C%E8%AE%B0%E5%BD%95"><span class="toc-number">14.3.</span> <span class="toc-text">14.3 失败也需要作为结果记录</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%BA%94%E3%80%81%E6%8E%A5%E4%B8%8B%E6%9D%A5%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E8%BF%99%E5%A5%97%E6%96%B9%E6%A1%88%E6%98%AF%E5%90%A6%E5%80%BC%E5%BE%97%E7%BB%A7%E7%BB%AD%E6%8A%95%E5%85%A5"><span class="toc-number">15.</span> <span class="toc-text">十五、接下来如何判断这套方案是否值得继续投入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B5%84%E6%96%99%E4%B8%8E%E4%BB%A3%E7%A0%81"><span class="toc-number">16.</span> <span class="toc-text">资料与代码</span></a></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2058306854838448" crossorigin="anonymous"></script>
+</div><!-- hexo injector body_end start -->
+  <script>
+  const CODE_CONFIG = {
+    beautify: false,
+    highlightCopy: true,
+    highlightLang: false,
+    highlightHeightLimit: 360,
+    isHighlightShrink: false,
+    copy: {
+      success: 'Copy Success',
+      error: 'Copy Error',
+      noSupport: 'Browser Not Support',
+    }
+  };
+  console.log(
+    `%c hexo-shiki-plugin %c v1.0.27 %c https://github.com/nova1751/hexo-shiki-plugin`,
+    "color: #fff; background: #5f5f5f",
+    "color: #fff; background: #80c8f8",
+    ""
+  );
+  </script>
+  <!-- hexo injector body_end end --></body></html>
