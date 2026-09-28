@@ -18,15 +18,15 @@
 <link rel="stylesheet" href="/skuukzky.github.io/lib/mdui_043tiny/mdui.css">
 
 
-<link rel="stylesheet" href="/skuukzky.github.io/lib/iconfont/iconfont.css?v=1790584277211">
+<link rel="stylesheet" href="/skuukzky.github.io/lib/iconfont/iconfont.css?v=1790598387652">
 
-<link rel="stylesheet" href="/skuukzky.github.io/css/style.css?v=1790584277211">
+<link rel="stylesheet" href="/skuukzky.github.io/css/style.css?v=1790598387652">
 
 
 
 
     
-        <link rel="stylesheet" href="/skuukzky.github.io/custom.css?v=1790584277211">
+        <link rel="stylesheet" href="/skuukzky.github.io/custom.css?v=1790598387652">
     
 
 
@@ -36,7 +36,7 @@
 <script src="/skuukzky.github.io/lib/lax.min.js" async></script>
 
 
-<script async src="/skuukzky.github.io/js/app.js?v=1790584277211"></script>
+<script async src="/skuukzky.github.io/js/app.js?v=1790598387652"></script>
 
  
 
@@ -282,11 +282,7 @@
 </div>
 
         <article>
-            <p>看到 <code>vlcaptcha</code> 时，我首先想到的应用场景，是把它已有的图像识别能力接进一个 Web 标注工作台：模型先找出候选对象，再按题意选择，人可以直接在图片上修正，最后导出数据集。</p>
-<p>这个想法很容易画成一条流程线，但真正实现时，难点很快转移到了模型调用之外。</p>
-<p>假设模型把一个物体认错了，我已经手动改好了标签和点位，这时候重新识别，修改应该怎样保留？如果一个请求在十秒之后才返回，而这十秒里我已经切换图片、修改题目，甚至重新打开了浏览器，系统还能不能判断这份结果应该放在哪里？如果页面显示“保存成功”，它指的是模型草稿、浏览器缓存、数据库记录，还是一份已经确认可以导出的标注？</p>
-<p>VLCaptcha Studio 的设计就是围绕这些具体问题展开的。最终形成的核心流程是：<strong>视觉模型生成候选，Jev 根据题意选择候选 ID，程序从对应版本中读取坐标，用户编辑并明确确认。</strong></p>
-<p>这篇文章从最初的分工讲起，再深入候选协议、数据库版本、坐标变换、自动保存、局部识别、后台任务和评测。文中的实现细节对应 0.2.0 版本；简化代码会明确标注，后续设想也会与当前能力分开。</p>
+            <p>VLCaptcha Studio 是一个由视觉模型生成候选、Jev 辅助判断、人工修正确认的 Web 标注工作台。本文详细拆解候选协议、版本管理、坐标转换、自动保存与局部重识别的设计。</p>
         </article>
     </div>
 </section> </div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
